@@ -219,39 +219,36 @@ export async function saveImageOfflineAndServer(
   return base64String;
 }
 
+export function getTaxonFallbackImage(taxonGroup?: string, scientificName?: string): string {
+  const sci = (scientificName || '').toLowerCase();
+  const grp = (taxonGroup || '').toLowerCase();
+  if (sci.includes('isthmohyla') || grp === 'amphibia') {
+    return '/isthmohyla_nacientes.jpg';
+  }
+  if (sci.includes('lateralis') || sci.includes('lora')) {
+    return '/uploads/bothriechis_lateralis.jpg';
+  }
+  if (sci.includes('cerrophid') || sci.includes('sasai')) {
+    return '/uploads/cerrophidium_sasai.jpg';
+  }
+  if (grp.includes('reptil')) {
+    return '/uploads/bothriechis_lateralis.jpg';
+  }
+  return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect width="400" height="300" fill="%230f382a"/><text x="50%" y="45%" dominant-baseline="middle" text-anchor="middle" fill="%236cf8bb" font-family="sans-serif" font-size="15" font-weight="bold">Fotografía de Campo</text><text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" fill="%23a5d0bc" font-family="sans-serif" font-size="12">${taxonGroup || 'Especie'}</text></svg>`;
+}
+
 /**
- * Maneja fallos de carga en elementos <img> buscando la imagen en la caché IndexedDB
+ * Maneja fallos de carga en elementos <img> buscando la imagen en caché, proxy o fallback específico de grupo
  */
 export async function handleImageOfflineFallback(
   imgElement: HTMLImageElement,
   fallbackUrl?: string
 ): Promise<void> {
+  if (!imgElement) return;
+
   const currentSrc = imgElement.src || '';
 
-  // 1. Intentar recuperar de IndexedDB o CacheStorage
-  try {
-    const cached = await getCachedImageUrl(currentSrc);
-    if (cached && cached !== currentSrc) {
-      imgElement.src = cached;
-      return;
-    }
-    const pathOnly = new URL(currentSrc, window.location.origin).pathname;
-    const cachedPath = await getCachedImageUrl(pathOnly);
-    if (cachedPath && cachedPath !== currentSrc) {
-      imgElement.src = cachedPath;
-      return;
-    }
-    const filename = pathOnly.split('/').pop();
-    if (filename) {
-      const cachedFile = await getCachedImageUrl(filename);
-      if (cachedFile && cachedFile !== currentSrc) {
-        imgElement.src = cachedFile;
-        return;
-      }
-    }
-  } catch {}
-
-  // 2. Proteger la fotografía del macho tuerto: NUNCA colocar la foto de la portada
+  // 1. Proteger fotografía del macho tuerto
   const isMacho =
     currentSrc.includes('macho') ||
     currentSrc.includes('un_ojo') ||
@@ -278,20 +275,46 @@ export async function handleImageOfflineFallback(
     return;
   }
 
-  // 3. Si se especificó un fallback distinto a la portada de Isthmohyla
+  // 2. Si URL externa falló en el navegador, intentar a través del proxy del servidor
+  if (currentSrc.startsWith('http://') || currentSrc.startsWith('https://')) {
+    if (!currentSrc.includes('/api/proxy-image')) {
+      imgElement.src = `/api/proxy-image?url=${encodeURIComponent(currentSrc)}`;
+      return;
+    }
+  }
+
+  // 3. Intentar recuperar de IndexedDB o CacheStorage
+  try {
+    const cached = await getCachedImageUrl(currentSrc);
+    if (cached && cached !== currentSrc) {
+      imgElement.src = cached;
+      return;
+    }
+  } catch {}
+
+  // 4. Si se especificó un fallback personalizado distinto a Isthmohyla
   if (fallbackUrl && fallbackUrl !== '/isthmohyla_nacientes.jpg') {
     imgElement.src = fallbackUrl;
     return;
   }
 
-  // 4. Si la imagen pertenece específicamente a Isthmohyla nacientes
-  if (imgElement.alt?.toLowerCase().includes('isthmohyla') || currentSrc.includes('isthmohyla')) {
+  // 5. Si la imagen pertenece específicamente a Isthmohyla nacientes
+  if (imgElement.alt?.toLowerCase().includes('isthmohyla')) {
     imgElement.src = '/isthmohyla_nacientes.jpg';
     return;
   }
 
-  // 5. Placeholder svg biológico neutral para otras especies o fotografías de usuario
-  imgElement.src = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect width="400" height="300" fill="%230f382a"/><text x="50%" y="45%" dominant-baseline="middle" text-anchor="middle" fill="%236cf8bb" font-family="sans-serif" font-size="15" font-weight="bold">Fotografía en Almacenamiento Local</text><text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" fill="%23a5d0bc" font-family="sans-serif" font-size="12">Sincronizado sin conexión</text></svg>`;
+  // 6. Placeholder taxonómico neutral para reptiles o flora (NUNCA asignar la rana a un reptil)
+  const isReptile =
+    imgElement.alt?.toLowerCase().includes('lateralis') ||
+    imgElement.alt?.toLowerCase().includes('cerrophid') ||
+    imgElement.alt?.toLowerCase().includes('reptil');
+  if (isReptile) {
+    imgElement.src = '/uploads/bothriechis_lateralis.jpg';
+    return;
+  }
+
+  imgElement.src = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect width="400" height="300" fill="%230f382a"/><text x="50%" y="45%" dominant-baseline="middle" text-anchor="middle" fill="%236cf8bb" font-family="sans-serif" font-size="15" font-weight="bold">Fotografía de Campo</text><text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" fill="%23a5d0bc" font-family="sans-serif" font-size="12">Biodiversidad Costa Rica</text></svg>`;
 }
 
 /**

@@ -395,6 +395,97 @@ app.post('/api/upload-photo', (req: Request, res: Response): void => {
 });
 
 /**
+ * Endpoint to download and permanently cache remote web image URLs locally
+ * Prevents hotlinking protection, CORS blocks, and 403 errors from external domains
+ */
+app.post('/api/cache-remote-image', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { url, prefix } = req.body;
+    if (!url || typeof url !== 'string' || !url.startsWith('http')) {
+      res.status(400).json({ success: false, error: 'URL inválida' });
+      return;
+    }
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        Accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+        'Sec-Fetch-Dest': 'image',
+        'Sec-Fetch-Mode': 'no-cors',
+        'Sec-Fetch-Site': 'cross-site',
+      },
+    });
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status} al consultar la imagen externa`);
+    }
+
+    const contentType = response.headers.get('content-type') || 'image/jpeg';
+    let ext = 'jpg';
+    if (contentType.includes('png')) ext = 'png';
+    else if (contentType.includes('webp')) ext = 'webp';
+    else if (contentType.includes('gif')) ext = 'gif';
+
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const cleanPrefix = (prefix || 'foto_web').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 30);
+    const filename = `${cleanPrefix}_${Date.now()}.${ext}`;
+    const targetPath = path.join(UPLOADS_DIR, filename);
+    fs.writeFileSync(targetPath, buffer);
+
+    const localUrl = `/uploads/${filename}`;
+    res.json({ success: true, localUrl, filename, size: buffer.length });
+  } catch (err: any) {
+    console.warn('Error downloading and caching remote image:', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * Proxy stream endpoint for external images that block direct browser referrers
+ */
+app.get('/api/proxy-image', async (req: Request, res: Response): Promise<void> => {
+  const targetUrl = req.query.url as string;
+  if (!targetUrl || !targetUrl.startsWith('http')) {
+    res.status(400).send('URL inválida');
+    return;
+  }
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+
+    const response = await fetch(targetUrl, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        Accept: 'image/*,*/*',
+      },
+    });
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      res.status(response.status).send('No se pudo obtener la imagen');
+      return;
+    }
+
+    const contentType = response.headers.get('content-type') || 'image/jpeg';
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+    const arrayBuffer = await response.arrayBuffer();
+    res.send(Buffer.from(arrayBuffer));
+  } catch (err: any) {
+    res.status(502).send('Error al conectar con el servidor de la imagen');
+  }
+});
+
+/**
  * Helper to fetch image and convert to base64 if an HTTP URL or local path is supplied
  */
 async function getImagePart(imageUrl?: string, imageBase64?: string): Promise<{ mimeType: string; data: string } | null> {
