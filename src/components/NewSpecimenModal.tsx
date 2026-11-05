@@ -210,20 +210,9 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
   const [newPhotoLabel, setNewPhotoLabel] = useState('');
   const [newPhotoDesc, setNewPhotoDesc] = useState('');
 
-  // Sightings / Entradas de Vistas
+  // Sightings / Entradas de Vistas (inicia en 0 para nuevas especies)
   const [sightingsList, setSightingsList] = useState<SightingEntry[]>(
-    editingSpecimen?.sightings || [
-      {
-        id: 's-init',
-        timestamp: new Date().toLocaleString('es-CR'),
-        date: new Date().toISOString().slice(0, 10),
-        observer: editingSpecimen?.collector || 'Biol. M. Cordero (UCR-MZ)',
-        locality: locality,
-        count: 1,
-        behaviorObserved: 'Ejemplar en actividad sobre follaje.',
-        microhabitat: microhabitat,
-      },
-    ]
+    editingSpecimen?.sightings || []
   );
   const [newSightingLocality, setNewSightingLocality] = useState('');
   const [newSightingCount, setNewSightingCount] = useState(1);
@@ -610,28 +599,7 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
       },
 
       additionalPhotos: additionalPhotosList,
-      sightings: sightingsList.length > 0
-        ? sightingsList
-        : [
-            {
-              id: `sight-collab-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-              timestamp: `${collectionDate || new Date().toISOString().slice(0, 10)} ${collectionTime || '14:00'}`.trim(),
-              date: collectionDate || new Date().toISOString().slice(0, 10),
-              observer: collector.trim() || 'Colaborador de Campo',
-              locality: locality || 'Costa Rica',
-              coordinates: `${coords.lat.toFixed(6)}° N, ${coords.lng.toFixed(6)}° W`,
-              count: 1,
-              individualsCount: 1,
-              microhabitat: microhabitat || 'Microhábitat registrado en campo',
-              weather: 'Condición ambiental de campo',
-              behaviorObserved: 'Individuo observado y catalogado en campo.',
-              notes: 'Avistamiento y registro inicial de la especie en la bitácora.',
-              vitalityStatus: 'VIVO',
-              lifeStage: (initialLifeStage as any) || 'ADULTO',
-              gpsSource: gpsSourceUsed,
-              deviceAccuracyMeters: gpsAccuracy || undefined,
-            },
-          ],
+      sightings: editingSpecimen ? (editingSpecimen.sightings || sightingsList || []) : [],
     };
 
     try {
@@ -658,10 +626,10 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
             <span className="material-symbols-outlined text-[#6cf8bb] text-[24px]">edit_note</span>
             <div>
               <h2 className="font-bold text-[17px] leading-tight">
-                {editingSpecimen ? 'Editar Registro Científico' : 'Nuevo Registro de Espécimen'}
+                {editingSpecimen ? 'Editar Ficha de Especie' : 'Agregar Especie Posible / Candidata'}
               </h2>
               <p className="text-[11px] text-[#79a28f] font-mono">
-                BioBitácora CR • Catálogo de Campo
+                {editingSpecimen ? 'BioBitácora CR • Modificar Ficha' : 'Inicia con 0 avistamientos • Tú y el equipo registrarán avistamientos en campo'}
               </p>
             </div>
           </div>

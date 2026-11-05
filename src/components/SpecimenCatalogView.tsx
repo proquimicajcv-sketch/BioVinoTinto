@@ -139,7 +139,7 @@ export const SpecimenCatalogView: React.FC<SpecimenCatalogViewProps> = ({
               className="px-3.5 py-1.5 rounded-xl bg-[#002217] hover:bg-[#0f382a] text-white text-xs font-bold flex items-center gap-1 shadow active:scale-95 transition-all cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px] text-[#6cf8bb]">add</span>
-              <span>Nuevo Registro</span>
+              <span>+ Agregar Especie</span>
             </button>
           </div>
         </div>

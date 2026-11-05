@@ -177,41 +177,32 @@ export const CoverLandingView: React.FC<CoverLandingViewProps> = ({
         {/* Resumen Cuantitativo: Especies | Avistamientos | Individuos */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-0 rounded-2xl bg-black/55 backdrop-blur-md border border-[#6cf8bb]/30 shadow-2xl overflow-hidden divide-y sm:divide-y-0 sm:divide-x divide-white/15 text-center">
           {/* Card 1: Especies */}
-          <div className="p-3.5 flex flex-col items-center justify-center">
+          <div className="p-4 flex flex-col items-center justify-center">
             <span className="text-[11px] uppercase font-mono text-[#a3e6ba] font-bold tracking-wider">
               ESPECIES
             </span>
-            <span className="text-3xl sm:text-4xl font-black text-white leading-tight my-0.5">
+            <span className="text-3xl sm:text-4xl font-black text-white leading-tight mt-1">
               {specimensCount}
-            </span>
-            <span className="text-[10px] text-[#c1c8c3] font-mono">
-              en catálogo (focal: <span className="italic text-[#a3e6ba]">Isthmohyla nacientes</span>)
             </span>
           </div>
 
           {/* Card 2: Avistamientos */}
-          <div className="p-3.5 flex flex-col items-center justify-center">
+          <div className="p-4 flex flex-col items-center justify-center">
             <span className="text-[11px] uppercase font-mono text-[#6cf8bb] font-bold tracking-wider">
               AVISTAMIENTOS
             </span>
-            <span className="text-3xl sm:text-4xl font-black text-white leading-tight my-0.5">
+            <span className="text-3xl sm:text-4xl font-black text-white leading-tight mt-1">
               {totalSightingsCount}
-            </span>
-            <span className="text-[10px] text-[#c1c8c3] font-mono">
-              entradas de campo (ej. en quebrada/roca)
             </span>
           </div>
 
           {/* Card 3: Individuos */}
-          <div className="p-3.5 flex flex-col items-center justify-center">
+          <div className="p-4 flex flex-col items-center justify-center">
             <span className="text-[11px] uppercase font-mono text-[#a3e6ba] font-bold tracking-wider">
               INDIVIDUOS
             </span>
-            <span className="text-3xl sm:text-4xl font-black text-white leading-tight my-0.5">
+            <span className="text-3xl sm:text-4xl font-black text-white leading-tight mt-1">
               {totalIndividualsCount}
-            </span>
-            <span className="text-[10px] text-[#c1c8c3] font-mono">
-              contabilizados (en área de estudio)
             </span>
           </div>
         </div>
@@ -277,8 +268,8 @@ export const CoverLandingView: React.FC<CoverLandingViewProps> = ({
               <span className="material-symbols-outlined text-[18px]">add_location_alt</span>
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="font-bold text-xs text-white truncate">Nuevo Registro</span>
-              <span className="text-[10px] text-[#a5d0bc] truncate">Toma en campo</span>
+              <span className="font-bold text-xs text-white truncate">+ Agregar Especie</span>
+              <span className="text-[10px] text-[#a5d0bc] truncate">Candidata en lista</span>
             </div>
           </button>
 

@@ -279,16 +279,22 @@ function sanitizeSpecimens(list: SpecimenRecord[]): SpecimenRecord[] {
         };
       }
 
-      // Para cualquier otra especie (candidata o registrada manualmente), conservar TODOS sus avistamientos
-      const preservedSightings = Array.isArray(item.sightings) ? [...item.sightings] : [];
-      preservedSightings.sort((a, b) => {
+      // Para cualquier otra especie (candidata o registrada manualmente), conservar los avistamientos reales ingresados por el equipo
+      const rawSightings = Array.isArray(item.sightings) ? item.sightings : [];
+      const realSightings = rawSightings.filter(
+        (s) =>
+          !s.notes?.includes('Avistamiento y registro inicial de la especie en la bitácora.') &&
+          s.id !== 's-init' &&
+          !s.id.startsWith('sight-init-')
+      );
+      realSightings.sort((a, b) => {
         const dateA = a.date || a.timestamp || '';
         const dateB = b.date || b.timestamp || '';
         return dateB.localeCompare(dateA);
       });
       return {
         ...item,
-        sightings: preservedSightings,
+        sightings: realSightings,
       };
     });
 

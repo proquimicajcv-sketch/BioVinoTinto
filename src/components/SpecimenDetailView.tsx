@@ -1628,13 +1628,17 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                   </div>
                 ))
               ) : (
-                <div className="p-3 rounded-lg bg-[#f2f4ee] text-xs text-[#414844] flex items-center justify-between">
-                  <span>Primer avistamiento de colecta registrado ({specimen.collectionDate}).</span>
+                <div className="p-4 rounded-xl bg-[#f8faf4] border border-[#c1c8c3]/60 text-xs text-[#414844] flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+                  <div>
+                    <p className="font-bold text-[#002217] text-sm">Sin avistamientos registrados todavía (0 individuos)</p>
+                    <p className="text-[11px] text-[#717974]">Especie candidata en catálogo. Tú o cualquier colaborador del equipo pueden registrar el primer avistamiento en campo con conteo de individuos, sustrato y GPS.</p>
+                  </div>
                   <button
                     onClick={handleOpenAddSighting}
-                    className="text-[#006c49] font-bold hover:underline cursor-pointer"
+                    className="px-3.5 py-2 rounded-xl bg-[#002217] hover:bg-[#0f382a] text-[#6cf8bb] font-bold text-xs flex items-center gap-1.5 shadow-sm cursor-pointer whitespace-nowrap"
                   >
-                    Añadir nuevo
+                    <span className="material-symbols-outlined text-[16px]">add_circle</span>
+                    <span>+ Registrar Avistamiento</span>
                   </button>
                 </div>
               )}
