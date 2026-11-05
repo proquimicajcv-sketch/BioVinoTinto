@@ -10,6 +10,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { SpecimenRecord } from '../types/specimen';
+import { enqueueOfflineMutation, isDeviceOnline } from './offlineSyncQueue';
 
 export enum OperationType {
   CREATE = 'create',
@@ -55,17 +56,26 @@ export async function testFirestoreConnection(): Promise<boolean> {
   }
 }
 
+export interface RemoteChangeEvent {
+  type: 'added' | 'modified' | 'removed';
+  specimen: SpecimenRecord;
+  observerName?: string;
+}
+
 /**
  * Real-time subscription to specimens collection
  * Automatically notifies callback whenever iPad, mobile, or laptop makes changes
  */
 export function subscribeToSpecimens(
   onUpdate: (specimens: SpecimenRecord[]) => void,
-  onStatusChange?: (status: 'connected' | 'syncing' | 'offline' | 'error') => void
+  onStatusChange?: (status: 'connected' | 'syncing' | 'offline' | 'error') => void,
+  onRemoteChange?: (event: RemoteChangeEvent) => void
 ): () => void {
   const specimensCol = collection(db, 'specimens');
 
   onStatusChange?.('syncing');
+
+  let isFirstLoad = true;
 
   const unsubscribe = onSnapshot(
     specimensCol,
@@ -73,6 +83,7 @@ export function subscribeToSpecimens(
       onStatusChange?.('connected');
       if (snapshot.empty) {
         onUpdate([]);
+        isFirstLoad = false;
         return;
       }
 
@@ -87,6 +98,22 @@ export function subscribeToSpecimens(
         }
       });
 
+      // Detect real-time updates from other collaborators after first load
+      if (!isFirstLoad && onRemoteChange) {
+        snapshot.docChanges().forEach((change) => {
+          const docData = change.doc.data() as SpecimenRecord;
+          if (docData && docData.scientificName) {
+            const lastSighting = docData.sightings && docData.sightings.length > 0 ? docData.sightings[0] : null;
+            onRemoteChange({
+              type: change.type,
+              specimen: { ...docData, id: change.doc.id },
+              observerName: lastSighting?.observer || docData.collector,
+            });
+          }
+        });
+      }
+
+      isFirstLoad = false;
       onUpdate(list);
     },
     (error) => {
@@ -99,10 +126,16 @@ export function subscribeToSpecimens(
 }
 
 /**
- * Save or update single specimen in cloud database
+ * Save or update single specimen in cloud database with offline auto-queue
  */
 export async function saveSpecimenToCloud(specimen: SpecimenRecord): Promise<void> {
   const path = `specimens/${specimen.id}`;
+
+  if (!isDeviceOnline()) {
+    enqueueOfflineMutation('SAVE_SPECIMEN', specimen);
+    return;
+  }
+
   try {
     const docRef = doc(db, 'specimens', specimen.id);
     // Sanitize undefined fields which Firestore rejects
@@ -111,6 +144,8 @@ export async function saveSpecimenToCloud(specimen: SpecimenRecord): Promise<voi
     await setDoc(docRef, cleanData, { merge: true });
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, path);
+    // Queue offline for later sync if connection failed
+    enqueueOfflineMutation('SAVE_SPECIMEN', specimen);
     throw error;
   }
 }
@@ -135,6 +170,11 @@ export async function deleteSpecimenFromCloud(specimenId: string): Promise<void>
 export async function batchSyncSpecimensToCloud(specimens: SpecimenRecord[]): Promise<void> {
   if (!Array.isArray(specimens) || specimens.length === 0) return;
 
+  if (!isDeviceOnline()) {
+    enqueueOfflineMutation('BATCH_SYNC', specimens);
+    return;
+  }
+
   try {
     const batch = writeBatch(db);
     for (const s of specimens) {
@@ -148,11 +188,13 @@ export async function batchSyncSpecimensToCloud(specimens: SpecimenRecord[]): Pr
     await batch.commit();
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, 'specimens/batch');
-    // Fallback: save one by one
+    // Fallback: save one by one, queue if failed
     for (const s of specimens) {
       try {
         await saveSpecimenToCloud(s);
-      } catch {}
+      } catch {
+        enqueueOfflineMutation('SAVE_SPECIMEN', s);
+      }
     }
   }
 }

@@ -118,7 +118,7 @@ export const CoverLandingView: React.FC<CoverLandingViewProps> = ({
               <span>Noche Rojo</span>
             </button>
 
-            {/* Badge Nube en Vivo */}
+            {/* Badge Nube en Vivo y Colaboración Multi-usuario */}
             <button
               onClick={onOpenSyncBackup}
               className={`px-3 py-1.5 rounded-full backdrop-blur-md border text-xs font-mono font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer ${
@@ -126,10 +126,10 @@ export const CoverLandingView: React.FC<CoverLandingViewProps> = ({
                   ? 'bg-black/50 border-[#6cf8bb]/50 text-[#6cf8bb] hover:bg-[#00281a]'
                   : 'bg-black/60 border-amber-400 text-amber-300'
               }`}
-              title="Base de datos en tiempo real entre iPad, Celular y PC"
+              title="Colaboración multi-usuario en vivo entre iPad, Celular y Laptop"
             >
-              <span className="material-symbols-outlined text-[16px] text-[#6cf8bb]">cloud</span>
-              <span>Nube en Vivo (iPad • Celular • PC)</span>
+              <span className="w-2 h-2 rounded-full bg-[#6cf8bb] animate-pulse" />
+              <span>En Vivo • Colaboración Activa</span>
             </button>
 
             {/* Badge Sincronizado */}

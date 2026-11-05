@@ -2,7 +2,7 @@
   "entities": {
     "Specimen": {
       "title": "Specimen",
-      "description": "Biological specimen record in Costa Rica with scientific taxonomy, georeference, morphometrics, sightings, and photos.",
+      "description": "Biological specimen record in Costa Rica with scientific taxonomy, georeference, morphometrics, sightings, collaborator attributions, and photos.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
@@ -19,7 +19,13 @@
         "fieldFolio": { "type": "string" },
         "heroImage": { "type": "string" },
         "heroImageDescription": { "type": "string" },
-        "updatedAt": { "type": "string" }
+        "updatedAt": { "type": "string" },
+        "georeference": { "type": "object" },
+        "taxonomy": { "type": "object" },
+        "morphometrics": { "type": "object" },
+        "bioacoustics": { "type": "object" },
+        "additionalPhotos": { "type": "array" },
+        "sightings": { "type": "array" }
       },
       "required": ["id", "scientificName"]
     }
@@ -27,7 +33,7 @@
   "firestore": {
     "/specimens/{specimenId}": {
       "schema": "Specimen",
-      "description": "Collection of biological specimens recorded in BioBitácora CR for cross-device real-time synchronization."
+      "description": "Collection of biological specimens recorded in BioBitácora CR for cross-device real-time multi-user synchronization and offline sync."
     }
   }
 }

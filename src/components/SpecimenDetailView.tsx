@@ -28,6 +28,7 @@ import {
 } from '../data/costaRicaData';
 import { formatProtectedCoordinates } from '../utils/geoprivacy';
 import { fetchLiveFieldWeather } from '../utils/weatherMoonService';
+import { captureDeviceGps } from '../utils/deviceGps';
 
 // Helper utilities for sighting date and time handling
 function parseDateToYmd(dateStr?: string, timestampStr?: string): string {
@@ -214,6 +215,30 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
   const [sightingVitalityDetail, setSightingVitalityDetail] = useState('');
   const [sightingLifeStage, setSightingLifeStage] = useState<LifeStage>('ADULTO');
   const [sightingSex, setSightingSex] = useState<BiologicalSex>('NO_APLICA');
+  const [isCapturingSightingGps, setIsCapturingSightingGps] = useState(false);
+  const [sightingGpsAccuracy, setSightingGpsAccuracy] = useState<number | null>(null);
+  const [sightingGpsError, setSightingGpsError] = useState<string | null>(null);
+  const [sightingGpsSource, setSightingGpsSource] = useState<'DEVICE_GPS' | 'MAP_SELECTION' | 'MANUAL_COORDS'>('MAP_SELECTION');
+
+  const handleCaptureSightingDeviceLocation = async () => {
+    setIsCapturingSightingGps(true);
+    setSightingGpsError(null);
+    try {
+      const res = await captureDeviceGps();
+      setSightingCoords({ lat: res.latitude, lng: res.longitude });
+      setSightingCoordsDms(res.combinedDMS);
+      setSightingLocality(res.locality);
+      setSightingLifeZone(res.lifeZone);
+      setSightingGpsAccuracy(res.accuracyMeters);
+      setSightingGpsSource('DEVICE_GPS');
+    } catch (err: any) {
+      setSightingGpsError(err.message || 'Error al obtener señal GPS del dispositivo');
+      setTimeout(() => setSightingGpsError(null), 6000);
+    } finally {
+      setIsCapturingSightingGps(false);
+    }
+  };
+
   const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
   const [waveformHeights, setWaveformHeights] = useState<number[]>([
     8, 16, 28, 20, 12, 32, 24, 12, 8, 20, 28, 16, 8, 24, 12, 8,
@@ -272,7 +297,8 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
 
   const handleOpenAddSighting = () => {
     const d = new Date();
-    setSightingObserver(currentObserverName || 'Ing. Carvajal V.');
+    const savedObs = typeof window !== 'undefined' ? localStorage.getItem('biobitacora_cr_observer_name') : null;
+    setSightingObserver(savedObs || currentObserverName || 'Ing. Carvajal V.');
     setSightingLocality(specimen.georeference.locality || '');
     setSightingDate(d.toISOString().slice(0, 10));
     setSightingTime(`${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`);
@@ -289,9 +315,12 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
     );
     setSightingLifeZone(specimen.georeference.lifeZone || '');
     setShowSightingMap(false);
+    setSightingGpsAccuracy(null);
+    setSightingGpsError(null);
+    setSightingGpsSource('MAP_SELECTION');
     setSightingCount(1);
     setSightingWeather('Soleado y cálido, 26°C');
-    setSightingMicrohabitat(specimen.georeference.microhabitat || '');
+    setSightingMicrohabitat(specimen.georeference.microhabitat || 'Sobre follaje ripario');
     setSightingBehavior('');
     setSightingNotes('');
     setSightingIsCurious(false);
@@ -327,9 +356,12 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
       sight.coordinates ||
         `${specimen.georeference.latitudeDMS}, ${specimen.georeference.longitudeDMS}`
     );
+    setSightingGpsAccuracy(sight.deviceAccuracyMeters || null);
+    setSightingGpsSource(sight.gpsSource || 'MAP_SELECTION');
+    setSightingGpsError(null);
     setSightingCount(sight.count || sight.individualsCount || 1);
     setSightingWeather(sight.weather || sight.weatherConditions || '');
-    setSightingMicrohabitat(sight.microhabitat || '');
+    setSightingMicrohabitat(sight.microhabitat || 'Sobre follaje ripario');
     setSightingBehavior(sight.behaviorObserved || '');
     setSightingNotes(sight.notes || '');
     setSightingIsCurious(!!(sight.isCuriousFinding || sight.curiousFindingTitle));
@@ -364,11 +396,16 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
       formattedTimestamp = `${monthName} ${year} (Aproximado)`;
     }
 
+    const finalObserver = sightingObserver.trim() || currentObserverName || 'Colaborador de Campo';
+    try {
+      localStorage.setItem('biobitacora_cr_observer_name', finalObserver);
+    } catch {}
+
     const sightingPayload: SightingEntry = {
       id: editingSightingId || 'sight-' + Date.now(),
       timestamp: formattedTimestamp,
       date: recordDate,
-      observer: sightingObserver.trim() || currentObserverName || 'Ing. Carvajal V.',
+      observer: finalObserver,
       locality: sightingLocality.trim() || specimen.georeference.locality,
       coordinates: sightingCoordsDms,
       count: Number(sightingCount) || 1,
@@ -390,6 +427,8 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
       vitalityCauseDetail: sightingVitality === 'MUERTO' ? sightingVitalityDetail.trim() : undefined,
       lifeStage: sightingLifeStage,
       sex: sightingSex,
+      gpsSource: sightingGpsSource,
+      deviceAccuracyMeters: sightingGpsAccuracy || undefined,
     };
 
     let updatedList: SightingEntry[] = [];
@@ -1480,10 +1519,31 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="font-bold text-[#002217] flex items-center gap-1">
-                          <span className="material-symbols-outlined text-[15px] text-[#006c49]">pin_drop</span>
+                        <span className="font-bold text-[#002217] flex items-center gap-1 text-[13px]">
+                          <span className="material-symbols-outlined text-[16px] text-[#006c49]">pin_drop</span>
                           {sight.locality}
                         </span>
+
+                        {/* Observador que registró este avistamiento */}
+                        <span className="px-2 py-0.5 rounded-full bg-[#002217] text-[#6cf8bb] text-[10px] font-bold flex items-center gap-1 shadow-2xs">
+                          <span className="material-symbols-outlined text-[12px]">person</span>
+                          <span>{sight.observer || 'Observador de Campo'}</span>
+                        </span>
+
+                        {/* Estadio de Desarrollo (Huevo, Renacuajo, Metamorfo, Juvenil, Adulto) */}
+                        {sight.lifeStage && sight.lifeStage !== 'NO_APLICA' && (
+                          <span className="px-2 py-0.5 rounded-full bg-[#e8f5e9] text-[#1b5e20] border border-[#a5d6a7] text-[10px] font-extrabold flex items-center gap-1 shadow-2xs font-mono">
+                            <span>
+                              {sight.lifeStage === 'HUEVO' ? '🥚 Huevo' :
+                               sight.lifeStage === 'LARVA_RENACUAJO' ? '🐸 Renacuajo' :
+                               sight.lifeStage === 'METAMORFO' ? '🔄 Metamorfo' :
+                               sight.lifeStage === 'JUVENIL' ? '🌱 Juvenil' :
+                               sight.lifeStage === 'SUBADULTO' ? '🌿 Subadulto' :
+                               sight.lifeStage === 'ADULTO' ? '👑 Adulto' : sight.lifeStage}
+                            </span>
+                          </span>
+                        )}
+
                         {(sight.isCuriousFinding || sight.curiousFindingTitle) && (
                           <span className="px-1.5 py-0.5 rounded bg-[#f59e0b] text-white text-[9px] font-bold font-mono uppercase flex items-center gap-0.5 shadow-2xs">
                             <span className="material-symbols-outlined text-[11px]">psychology_alt</span>
@@ -1512,6 +1572,34 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                           <span className="material-symbols-outlined text-[15px]">delete</span>
                         </button>
                       </div>
+                    </div>
+
+                    {/* Fila de Coordenadas GPS y Sustrato en la Quebrada */}
+                    <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-[#e1e3dd]/80 text-[11px]">
+                      {sight.coordinates && (
+                        <span className="font-mono text-[10px] text-[#006c49] font-semibold bg-[#6cf8bb]/20 px-2 py-0.5 rounded-md border border-[#006c49]/20 flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[12px]">my_location</span>
+                          <span>{sight.coordinates}</span>
+                          {sight.deviceAccuracyMeters && (
+                            <span className="text-[9px] font-bold text-[#002217] bg-[#6cf8bb] px-1 rounded">
+                              ±{sight.deviceAccuracyMeters}m GPS
+                            </span>
+                          )}
+                        </span>
+                      )}
+
+                      {sight.microhabitat && (
+                        <span className="text-[#002217] font-semibold flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-[#c1c8c3]/60">
+                          <span className="material-symbols-outlined text-[13px] text-[#006c49]">landscape</span>
+                          <span>{sight.microhabitat}</span>
+                        </span>
+                      )}
+
+                      {sight.sex && sight.sex !== 'NO_APLICA' && (
+                        <span className="text-[#414844] text-[10px] font-mono">
+                          • Sexo: {sight.sex === 'MACHO' ? 'Macho' : sight.sex === 'HEMBRA' ? 'Hembra' : 'Indeterminado'}
+                        </span>
+                      )}
                     </div>
 
                     {(sight.curiousFindingTitle || sight.curiousFindingDescription) && (
@@ -1800,19 +1888,28 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                   </button>
                 </div>
               </div>
-              {/* Observador */}
-              <div>
-                <label className="block text-[11px] font-bold text-[#002217] uppercase mb-1">
-                  Observador / Registrador *
-                </label>
+              {/* Observador / Colaborador */}
+              <div className="p-3 rounded-xl bg-white border border-[#c1c8c3] flex flex-col gap-1.5 shadow-2xs">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-bold text-[#002217] uppercase flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[16px] text-[#006c49]">person</span>
+                    Nombre del Observador(a) / Colaborador(a) *
+                  </label>
+                  <span className="text-[10px] text-[#006c49] font-mono font-bold bg-[#6cf8bb]/20 px-2 py-0.5 rounded-full">
+                    Aporte Identificado
+                  </span>
+                </div>
                 <input
                   type="text"
                   required
                   value={sightingObserver}
                   onChange={(e) => setSightingObserver(e.target.value)}
-                  placeholder="Nombre de quien realiza el avistamiento..."
-                  className="w-full px-3 py-2 rounded-xl border border-[#c1c8c3] text-xs text-[#191c19] focus:outline-none focus:ring-2 focus:ring-[#006c49]"
+                  placeholder="Tu nombre (ej: Carlos Mora, Dra. Gómez, etc.)"
+                  className="w-full px-3 py-2 rounded-xl border border-[#c1c8c3] text-xs font-semibold text-[#002217] bg-white focus:outline-none focus:ring-2 focus:ring-[#006c49]"
                 />
+                <span className="text-[10px] text-[#717974]">
+                  Este nombre se mostrará en la bitácora pública y en tiempo real para todos los colaboradores.
+                </span>
               </div>
 
               {/* Ubicación Geográfica, Coordenadas y Zona de Vida del Avistamiento */}
@@ -1826,6 +1923,51 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                     WGS84 • Costa Rica
                   </span>
                 </div>
+
+                {/* Botón directo para capturar GPS del móvil / computadora */}
+                <div className="p-3 rounded-xl bg-gradient-to-r from-[#002217] to-[#0f382a] text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 shadow-sm border border-[#6cf8bb]/40">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-[#6cf8bb]/20 border border-[#6cf8bb]/40 flex items-center justify-center text-[#6cf8bb] flex-shrink-0">
+                      <span className={`material-symbols-outlined text-[20px] ${isCapturingSightingGps ? 'animate-spin' : ''}`}>
+                        {isCapturingSightingGps ? 'sync' : 'my_location'}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-bold text-xs text-[#6cf8bb] flex items-center gap-1.5">
+                        <span>Coordenadas Satelitales del Dispositivo</span>
+                        {sightingGpsAccuracy && (
+                          <span className="text-[9px] bg-[#6cf8bb] text-[#002217] px-1.5 py-0.5 rounded-full font-mono font-extrabold">
+                            ±{sightingGpsAccuracy}m
+                          </span>
+                        )}
+                      </span>
+                      <span className="text-[10px] text-[#a5d0bc]">
+                        {isCapturingSightingGps
+                          ? 'Leyendo satélites GPS en tiempo real...'
+                          : sightingGpsSource === 'DEVICE_GPS'
+                          ? 'Punto fijado desde el sensor de tu dispositivo.'
+                          : 'Captura el punto exacto donde estás parado en la quebrada.'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={isCapturingSightingGps}
+                    onClick={handleCaptureSightingDeviceLocation}
+                    className="py-1.5 px-3 rounded-lg bg-[#6cf8bb] hover:bg-[#a5d0bc] text-[#002217] text-xs font-bold flex items-center gap-1 shadow transition-all cursor-pointer disabled:opacity-50 active:scale-95 flex-shrink-0"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">near_me</span>
+                    <span>{isCapturingSightingGps ? 'Obteniendo GPS...' : '📍 Capturar GPS de mi Dispositivo'}</span>
+                  </button>
+                </div>
+
+                {sightingGpsError && (
+                  <div className="p-2 rounded-lg bg-red-100 border border-red-300 text-red-800 text-[11px] flex items-center gap-1.5 animate-in fade-in">
+                    <span className="material-symbols-outlined text-red-600 text-[16px]">error</span>
+                    <span>{sightingGpsError}</span>
+                  </div>
+                )}
 
                 {/* Selector: Automático por Mapa vs Entrada Manual */}
                 <div className="grid grid-cols-2 gap-2 p-1 bg-[#edefe9] rounded-xl text-xs font-bold">
@@ -2004,17 +2146,52 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                 </div>
               </div>
 
-              {/* Microhábitat */}
-              <div>
-                <label className="block text-[11px] font-bold text-[#002217] uppercase mb-1">
-                  Microhábitat / Estrato
-                </label>
+              {/* Microhábitat & Sustrato de Quebrada */}
+              <div className="p-3.5 rounded-xl bg-white border border-[#c1c8c3] flex flex-col gap-2.5 shadow-2xs">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-bold text-[#002217] uppercase flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[16px] text-[#006c49]">landscape</span>
+                    ¿Dónde se vio el individuo? (Sustrato / Microhábitat) *
+                  </label>
+                  <span className="text-[10px] text-[#717974] font-medium">Toca para marcar</span>
+                </div>
+
+                {/* Botones de selección rápida de sustrato en quebrada */}
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    { label: '🌊 En la quebrada', value: 'En el agua de la quebrada / corriente' },
+                    { label: '🪨 Sobre una roca', value: 'Sobre roca / piedra mojada del lecho' },
+                    { label: '🌿 Sobre ramas', value: 'Sobre ramas / arbustos ribereños' },
+                    { label: '🍃 Sobre hojas / follaje', value: 'Sobre follaje / hojas anchas ribereñas' },
+                    { label: '🪵 En tronco caído', value: 'En tronco caído / madera húmeda' },
+                    { label: '🌧️ En poza / naciente', value: 'En poza léntica o naciente de agua' },
+                    { label: '🍂 En hojarasca húmeda', value: 'En hojarasca del suelo ripario' },
+                  ].map((sub) => {
+                    const isSelected = sightingMicrohabitat.includes(sub.label.split(' ')[1]) || sightingMicrohabitat === sub.value;
+                    return (
+                      <button
+                        key={sub.label}
+                        type="button"
+                        onClick={() => setSightingMicrohabitat(sub.value)}
+                        className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer border ${
+                          isSelected
+                            ? 'bg-[#002217] text-[#6cf8bb] border-[#002217] shadow-xs scale-[1.02]'
+                            : 'bg-[#f2f4ee] hover:bg-[#e7e9e3] text-[#191c19] border-[#c1c8c3]'
+                        }`}
+                      >
+                        <span>{sub.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
                 <input
                   type="text"
+                  required
                   value={sightingMicrohabitat}
                   onChange={(e) => setSightingMicrohabitat(e.target.value)}
-                  placeholder="Ej: Envés de hoja de Heliconia sobre charca..."
-                  className="w-full px-3 py-2 rounded-xl border border-[#c1c8c3] text-xs text-[#191c19] focus:outline-none focus:ring-2 focus:ring-[#006c49]"
+                  placeholder="Ej: Sobre una roca húmeda a 20 cm del caudal, sobre ramas, etc."
+                  className="w-full px-3 py-2 rounded-xl border border-[#c1c8c3] text-xs font-medium text-[#191c19] focus:outline-none focus:ring-2 focus:ring-[#006c49] bg-[#f8faf4]"
                 />
               </div>
 
@@ -2088,33 +2265,76 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                 )}
               </div>
 
-              {/* Estadio de Desarrollo & Sexo (Larva, Renacuajo, Huevo, Adulto, etc.) */}
-              <div className="p-3 rounded-xl bg-[#f8faf4] border border-[#c1c8c3] flex flex-col gap-2">
-                <span className="text-[11px] font-bold text-[#002217] uppercase flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[16px] text-[#006c49]">egg_alt</span>
-                  Estadio de Desarrollo &amp; Sexo
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {/* Estadio de Desarrollo (Huevo, Renacuajo, Metamorfo, Juvenil, Adulto) */}
+              <div className="p-3.5 rounded-xl bg-[#f8faf4] border border-[#c1c8c3] flex flex-col gap-2.5 shadow-2xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-[#002217] uppercase flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[16px] text-[#006c49]">pest_control</span>
+                    Estadio del Individuo (Ciclo de Vida) *
+                  </span>
+                  <span className="text-[10px] text-[#006c49] font-mono font-bold bg-[#6cf8bb]/20 px-2 py-0.5 rounded-full">
+                    {sightingLifeStage === 'HUEVO' ? '🥚 Huevo' :
+                     sightingLifeStage === 'LARVA_RENACUAJO' ? '🐸 Renacuajo' :
+                     sightingLifeStage === 'METAMORFO' ? '🔄 Metamorfo' :
+                     sightingLifeStage === 'JUVENIL' ? '🌱 Juvenil' :
+                     sightingLifeStage === 'SUBADULTO' ? '🌿 Subadulto' :
+                     sightingLifeStage === 'ADULTO' ? '👑 Adulto' : 'No especificado'}
+                  </span>
+                </div>
+
+                {/* Botones de selección de 1 toque para estadio */}
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
+                  {[
+                    { id: 'HUEVO' as LifeStage, icon: '🥚', name: 'Huevo', desc: 'Masa de huevos' },
+                    { id: 'LARVA_RENACUAJO' as LifeStage, icon: '🐸', name: 'Renacuajo', desc: 'Larva acuática' },
+                    { id: 'METAMORFO' as LifeStage, icon: '🔄', name: 'Metamorfo', desc: 'Con cola y patas' },
+                    { id: 'JUVENIL' as LifeStage, icon: '🌱', name: 'Juvenil', desc: 'Post-metamorfosis' },
+                    { id: 'ADULTO' as LifeStage, icon: '👑', name: 'Adulto', desc: 'Maduro / Canto' },
+                  ].map((stg) => {
+                    const isSelected = sightingLifeStage === stg.id;
+                    return (
+                      <button
+                        key={stg.id}
+                        type="button"
+                        onClick={() => setSightingLifeStage(stg.id)}
+                        className={`p-2 rounded-xl border flex flex-col items-center justify-center text-center transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-[#002217] text-[#6cf8bb] border-[#002217] shadow-sm ring-2 ring-[#6cf8bb]/50'
+                            : 'bg-white hover:bg-[#f2f4ee] text-[#191c19] border-[#c1c8c3]'
+                        }`}
+                      >
+                        <span className="text-lg">{stg.icon}</span>
+                        <span className="text-xs font-bold leading-tight mt-0.5">{stg.name}</span>
+                        <span className={`text-[9px] ${isSelected ? 'text-[#a5d0bc]' : 'text-[#717974]'}`}>
+                          {stg.desc}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-[#e1e3dd]">
                   <div>
-                    <label className="block text-[10px] font-bold text-[#414844] uppercase mb-1">
-                      Estadio del individuo
+                    <label className="block text-[10px] font-bold text-[#414844] uppercase mb-0.5">
+                      Estadio en lista desplegable
                     </label>
                     <select
                       value={sightingLifeStage}
                       onChange={(e) => setSightingLifeStage(e.target.value as LifeStage)}
                       className="w-full px-2.5 py-1.5 rounded-lg border border-[#c1c8c3] bg-white text-xs font-semibold text-[#191c19] focus:outline-none focus:ring-2 focus:ring-[#006c49]"
                     >
-                      <option value="ADULTO">Adulto</option>
-                      <option value="SUBADULTO">Subadulto</option>
-                      <option value="METAMORFO_JUVENIL">Juvenil / Metamorfo reciente</option>
-                      <option value="LARVA_RENACUAJO">Larva / Renacuajo</option>
-                      <option value="HUEVO">Huevo / Masa de huevos</option>
-                      <option value="NO_APLICA">No aplica (No especificado)</option>
+                      <option value="ADULTO">👑 Adulto</option>
+                      <option value="JUVENIL">🌱 Juvenil</option>
+                      <option value="METAMORFO">🔄 Metamorfo</option>
+                      <option value="LARVA_RENACUAJO">🐸 Renacuajo / Larva</option>
+                      <option value="HUEVO">🥚 Huevo / Masa ovígera</option>
+                      <option value="SUBADULTO">🌿 Subadulto</option>
+                      <option value="NO_APLICA">No especificado</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold text-[#414844] uppercase mb-1">
+                    <label className="block text-[10px] font-bold text-[#414844] uppercase mb-0.5">
                       Sexo Biológico
                     </label>
                     <select

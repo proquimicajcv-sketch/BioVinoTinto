@@ -64,7 +64,7 @@ export interface PhotoRecord {
 
 export type VitalityStatus = 'VIVO' | 'MUERTO';
 export type VitalityCause = 'ATROPELLO' | 'DEPREDACION' | 'DESECACION' | 'ENFERMEDAD_HONGOS' | 'CAUSA_DESCONOCIDA' | 'OTRO';
-export type LifeStage = 'HUEVO' | 'LARVA_RENACUAJO' | 'METAMORFO_JUVENIL' | 'SUBADULTO' | 'ADULTO' | 'NO_APLICA';
+export type LifeStage = 'HUEVO' | 'LARVA_RENACUAJO' | 'METAMORFO' | 'JUVENIL' | 'METAMORFO_JUVENIL' | 'SUBADULTO' | 'ADULTO' | 'NO_APLICA';
 export type BiologicalSex = 'MACHO' | 'HEMBRA' | 'INDETERMINADO' | 'NO_APLICA';
 
 export interface SightingEntry {
@@ -92,6 +92,10 @@ export interface SightingEntry {
   vitalityCauseDetail?: string; // e.g. Atropello en carretera ruta 32
   lifeStage?: LifeStage; // Adulto, Renacuajo, Larva, Huevo, etc. o NO_APLICA
   sex?: BiologicalSex; // Macho, Hembra, Indeterminado o NO_APLICA
+  gpsSource?: 'DEVICE_GPS' | 'MAP_SELECTION' | 'MANUAL_COORDS';
+  deviceAccuracyMeters?: number;
+  deviceAltitudeMeters?: number;
+  collaboratorDeviceId?: string;
 }
 
 export interface SpecimenRecord {

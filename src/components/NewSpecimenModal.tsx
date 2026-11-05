@@ -11,6 +11,7 @@ import {
   detectLocationAndLifeZone,
 } from '../data/costaRicaData';
 import { saveImageOfflineAndServer } from '../utils/offlineImageCache';
+import { captureDeviceGps } from '../utils/deviceGps';
 
 interface NewSpecimenModalProps {
   isOpen: boolean;
@@ -97,6 +98,34 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
   // Ubicación & Modo de selección (Mapa automático vs Entrada manual)
   const [locationTab, setLocationTab] = useState<'map' | 'manual'>('map');
   const [autoLocationDetectedMsg, setAutoLocationDetectedMsg] = useState<string | null>(null);
+  const [isCapturingGps, setIsCapturingGps] = useState<boolean>(false);
+  const [gpsAccuracy, setGpsAccuracy] = useState<number | null>(null);
+  const [gpsErrorMsg, setGpsErrorMsg] = useState<string | null>(null);
+  const [gpsSourceUsed, setGpsSourceUsed] = useState<'DEVICE_GPS' | 'MAP_SELECTION' | 'MANUAL_COORDS'>('MAP_SELECTION');
+
+  const handleCaptureDeviceLocation = async () => {
+    setIsCapturingGps(true);
+    setGpsErrorMsg(null);
+    try {
+      const res = await captureDeviceGps();
+      setCoords({ lat: res.latitude, lng: res.longitude });
+      setElevation(res.altitudeMeters);
+      setLocality(res.locality);
+      setProvince(res.province);
+      setLifeZone(res.lifeZone);
+      setGpsAccuracy(res.accuracyMeters);
+      setGpsSourceUsed('DEVICE_GPS');
+      setAutoLocationDetectedMsg(
+        `📡 Coordenadas capturadas del sensor GPS de este dispositivo: ${res.combinedDMS} (Precisión: ±${res.accuracyMeters} m, Altitud: ${res.altitudeMeters} msnm) • ${res.locality}`
+      );
+      setTimeout(() => setAutoLocationDetectedMsg(null), 8000);
+    } catch (err: any) {
+      setGpsErrorMsg(err.message || 'Error al obtener GPS del dispositivo');
+      setTimeout(() => setGpsErrorMsg(null), 6000);
+    } finally {
+      setIsCapturingGps(false);
+    }
+  };
 
   // Scientific taxonomy form state
   const [scientificName, setScientificName] = useState(
@@ -137,6 +166,7 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
   const [confirmedScienceNotes, setConfirmedScienceNotes] = useState(
     editingSpecimen?.morphometrics.confirmedScientificData || ''
   );
+  const [initialLifeStage, setInitialLifeStage] = useState<string>('ADULTO');
 
   // BIOACOUSTICS MANAGEMENT
   const [hasBioacoustics, setHasBioacoustics] = useState<boolean>(
@@ -584,23 +614,31 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
         ? sightingsList
         : [
             {
-              id: `sight-init-${editingSpecimen?.id || Date.now()}`,
+              id: `sight-collab-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
               timestamp: `${collectionDate || new Date().toISOString().slice(0, 10)} ${collectionTime || '14:00'}`.trim(),
               date: collectionDate || new Date().toISOString().slice(0, 10),
-              observer: collector || 'Ing. Carvajal V.',
+              observer: collector.trim() || 'Colaborador de Campo',
               locality: locality || 'Costa Rica',
               coordinates: `${coords.lat.toFixed(6)}° N, ${coords.lng.toFixed(6)}° W`,
               count: 1,
               individualsCount: 1,
-              microhabitat: 'Microhábitat registrado en campo',
+              microhabitat: microhabitat || 'Microhábitat registrado en campo',
               weather: 'Condición ambiental de campo',
               behaviorObserved: 'Individuo observado y catalogado en campo.',
               notes: 'Avistamiento y registro inicial de la especie en la bitácora.',
               vitalityStatus: 'VIVO',
-              lifeStage: 'ADULTO',
+              lifeStage: (initialLifeStage as any) || 'ADULTO',
+              gpsSource: gpsSourceUsed,
+              deviceAccuracyMeters: gpsAccuracy || undefined,
             },
           ],
     };
+
+    try {
+      if (collector.trim()) {
+        localStorage.setItem('biobitacora_cr_observer_name', collector.trim());
+      }
+    } catch {}
 
     onSave(newRecord);
     onClose();
@@ -841,6 +879,53 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
               </span>
             </div>
 
+            {/* Botón de Captura GPS Directa del Dispositivo */}
+            <div className="p-3 rounded-xl bg-gradient-to-r from-[#002217] to-[#0f382a] text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md border border-[#6cf8bb]/40">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#6cf8bb]/20 border border-[#6cf8bb]/40 flex items-center justify-center text-[#6cf8bb] flex-shrink-0">
+                  <span className={`material-symbols-outlined text-[22px] ${isCapturingGps ? 'animate-spin' : ''}`}>
+                    {isCapturingGps ? 'sync' : 'my_location'}
+                  </span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-bold text-xs text-[#6cf8bb] flex items-center gap-1.5">
+                    <span>GPS Satelital WGS84 del Dispositivo</span>
+                    {gpsAccuracy && (
+                      <span className="text-[10px] bg-[#6cf8bb] text-[#002217] px-2 py-0.5 rounded-full font-mono font-extrabold">
+                        ±{gpsAccuracy}m
+                      </span>
+                    )}
+                  </span>
+                  <p className="text-[11px] text-[#a5d0bc]">
+                    {isCapturingGps
+                      ? 'Conectando con satélites GPS en tiempo real...'
+                      : gpsSourceUsed === 'DEVICE_GPS'
+                      ? 'Coordenadas del sensor de este dispositivo fijadas con éxito.'
+                      : 'Captura las coordenadas exactas de campo desde tu celular o laptop.'}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                disabled={isCapturingGps}
+                onClick={handleCaptureDeviceLocation}
+                className="py-2 px-3.5 rounded-xl bg-[#6cf8bb] hover:bg-[#a5d0bc] text-[#002217] text-xs font-bold flex items-center justify-center gap-1.5 shadow transition-all cursor-pointer disabled:opacity-50 active:scale-95 flex-shrink-0"
+              >
+                <span className="material-symbols-outlined text-[17px]">
+                  {isCapturingGps ? 'satellite_alt' : 'near_me'}
+                </span>
+                <span>{isCapturingGps ? 'Obteniendo GPS...' : '📍 Usar GPS de este Dispositivo'}</span>
+              </button>
+            </div>
+
+            {gpsErrorMsg && (
+              <div className="p-2.5 rounded-xl bg-red-100 border border-red-300 text-red-800 text-xs flex items-center gap-2 animate-in fade-in">
+                <span className="material-symbols-outlined text-red-600 text-[18px]">error</span>
+                <span>{gpsErrorMsg}</span>
+              </div>
+            )}
+
             {/* Selector de Modo: Automático por Mapa vs Entrada Manual */}
             <div className="grid grid-cols-2 gap-2 p-1 bg-[#edefe9] rounded-xl text-xs font-bold">
               <button
@@ -981,7 +1066,7 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
 
                   <div>
                     <label className="block text-xs font-bold text-[#002217] mb-1">
-                      Microhábitat / Estrato
+                      Microhábitat / Estrato y Sustrato
                     </label>
                     <input
                       type="text"
@@ -990,6 +1075,60 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
                       placeholder="ej. Follaje ribereño a 45 cm del caudal"
                       className="w-full px-3 py-2 rounded-lg bg-white border border-[#c1c8c3] text-xs text-[#191c19] focus:ring-2 focus:ring-[#006c49]"
                     />
+                    {/* Botones de Sustrato Rápido */}
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {[
+                        { label: '🌊 En la quebrada', value: 'En la quebrada / corriente de agua' },
+                        { label: '🪨 Sobre una roca', value: 'Sobre una roca húmeda en orilla' },
+                        { label: '🌿 Sobre ramas', value: 'Sobre ramas a baja altura (<1 m)' },
+                        { label: '🍃 Sobre hojas', value: 'Sobre hojas de vegetación riparia' },
+                        { label: '🪵 En tronco caído', value: 'Sobre tronco caído húmedo' },
+                        { label: '🌧️ En poza / naciente', value: 'En poza / nacimiento de agua' },
+                        { label: '🍂 En hojarasca', value: 'En hojarasca del suelo' },
+                      ].map((sub) => (
+                        <button
+                          key={sub.label}
+                          type="button"
+                          onClick={() => setMicrohabitat(sub.value)}
+                          className={`px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold border transition-all cursor-pointer ${
+                            microhabitat === sub.value
+                              ? 'bg-[#002217] text-[#6cf8bb] border-[#6cf8bb]/60 shadow-xs'
+                              : 'bg-white hover:bg-[#f0f2ec] text-[#414844] border-[#c1c8c3]'
+                          }`}
+                        >
+                          {sub.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Selector de Estado Biológico / Etapa de Desarrollo */}
+                    <div className="mt-3 pt-2 border-t border-[#e1e3dd]">
+                      <label className="block text-[11px] font-bold text-[#002217] mb-1 uppercase tracking-wide">
+                        Estado Biológico al Avistar:
+                      </label>
+                      <div className="flex flex-wrap gap-1.5">
+                        {[
+                          { id: 'HUEVO', label: '🥚 Huevo' },
+                          { id: 'RENACUAJO', label: '🐸 Renacuajo' },
+                          { id: 'METAMORFO', label: '🔄 Metamorfo' },
+                          { id: 'JUVENIL', label: '🌱 Juvenil' },
+                          { id: 'ADULTO', label: '👑 Adulto' },
+                        ].map((st) => (
+                          <button
+                            key={st.id}
+                            type="button"
+                            onClick={() => setInitialLifeStage(st.id)}
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all cursor-pointer ${
+                              initialLifeStage === st.id
+                                ? 'bg-[#002217] text-[#6cf8bb] border-[#6cf8bb]/60 shadow-xs font-bold'
+                                : 'bg-white hover:bg-[#f0f2ec] text-[#414844] border-[#c1c8c3]'
+                            }`}
+                          >
+                            {st.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -1152,15 +1291,19 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
             <div>
               <label className="block text-xs font-bold text-[#002217] mb-1 flex items-center gap-1">
                 <span className="material-symbols-outlined text-[15px] text-[#006c49]">person</span>
-                Colector / Observador
+                Nombre del Observador(a) / Colaborador(a) *
               </label>
               <input
                 type="text"
+                required
                 value={collector}
                 onChange={(e) => setCollector(e.target.value)}
-                placeholder="Nombre del investigador..."
-                className="w-full px-3 py-2 rounded-lg bg-white border border-[#c1c8c3] text-xs font-medium text-[#191c19] focus:ring-2 focus:ring-[#006c49]"
+                placeholder="Tu nombre (ej. Carlos Mora, Dra. Gómez...)"
+                className="w-full px-3 py-2 rounded-lg bg-white border border-[#c1c8c3] text-xs font-semibold text-[#002217] focus:ring-2 focus:ring-[#006c49]"
               />
+              <span className="text-[10px] text-[#717974] block mt-0.5">
+                Tu nombre quedará asociado a este aporte para todos los colaboradores en directo.
+              </span>
             </div>
           </div>
 

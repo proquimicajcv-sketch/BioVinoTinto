@@ -23,6 +23,12 @@ import {
   batchSyncSpecimensToCloud,
   testFirestoreConnection,
 } from './services/firestoreSync';
+import {
+  subscribeToOnlineStatus,
+  flushOfflineQueue,
+  getPendingQueueCount,
+  isDeviceOnline,
+} from './services/offlineSyncQueue';
 
 type ActiveView = 'COVER' | 'DETAIL' | 'MAP' | 'CATALOG' | 'STATISTICS';
 
@@ -273,13 +279,16 @@ function sanitizeSpecimens(list: SpecimenRecord[]): SpecimenRecord[] {
         };
       }
 
-      // Para cualquier otra especie, conservar sus avistamientos reales ingresados por el usuario
-      const realSightings = (item.sightings || []).filter(
-        (s) => !s.id.startsWith('sight-init-')
-      );
+      // Para cualquier otra especie (candidata o registrada manualmente), conservar TODOS sus avistamientos
+      const preservedSightings = Array.isArray(item.sightings) ? [...item.sightings] : [];
+      preservedSightings.sort((a, b) => {
+        const dateA = a.date || a.timestamp || '';
+        const dateB = b.date || b.timestamp || '';
+        return dateB.localeCompare(dateA);
+      });
       return {
         ...item,
-        sightings: realSightings,
+        sightings: preservedSightings,
       };
     });
 
@@ -345,6 +354,15 @@ export default function App() {
   const [isSyncingServer, setIsSyncingServer] = useState(false);
   const [cloudSyncStatus, setCloudSyncStatus] = useState<'connected' | 'syncing' | 'offline'>('syncing');
   const [lastCloudSyncTime, setLastCloudSyncTime] = useState<string>('');
+  const [isOnline, setIsOnline] = useState<boolean>(() => isDeviceOnline());
+  const [pendingQueueCount, setPendingQueueCount] = useState<number>(() => getPendingQueueCount());
+  const [liveCollabAlert, setLiveCollabAlert] = useState<{
+    id: string;
+    observer: string;
+    message: string;
+    scientificName: string;
+    type: 'added' | 'modified' | 'removed';
+  } | null>(null);
   const [presetNewCoords, setPresetNewCoords] = useState<{
     lat: number;
     lng: number;
@@ -405,8 +423,26 @@ export default function App() {
     }
   }, [specimens]);
 
+  // Track online/offline status and automatically flush offline queue
+  useEffect(() => {
+    const unsubOnline = subscribeToOnlineStatus((online, count) => {
+      setIsOnline(online);
+      setPendingQueueCount(count);
+      if (online && count > 0) {
+        flushOfflineQueue((syncedCount) => {
+          setSyncStatusToast(`¡Conexión recuperada! Se sincronizaron automáticamente ${syncedCount} registros con la nube.`);
+          setTimeout(() => setSyncStatusToast(null), 4500);
+        });
+      }
+    });
+
+    return () => {
+      unsubOnline();
+    };
+  }, []);
+
   // Real-time Cloud Synchronization (Google Cloud Firestore)
-  // Ensures iPad, iPhone/Android, and Laptops stay in sync in real time
+  // Ensures iPad, iPhone/Android, and Laptops stay in sync in real time with live collaboration alerts
   useEffect(() => {
     testFirestoreConnection();
 
@@ -447,6 +483,30 @@ export default function App() {
       },
       (status) => {
         setCloudSyncStatus(status === 'error' ? 'offline' : status);
+      },
+      (remoteChange) => {
+        const observer = remoteChange.observerName || 'Un colaborador';
+        const sciName = remoteChange.specimen?.scientificName || 'Especie';
+        let actionText = '';
+        if (remoteChange.type === 'added') {
+          actionText = `agregó una nueva especie: ${sciName}`;
+        } else if (remoteChange.type === 'removed') {
+          actionText = `eliminó un registro de: ${sciName}`;
+        } else {
+          actionText = `registró un avistamiento en directo en: ${sciName}`;
+        }
+
+        setLiveCollabAlert({
+          id: `collab-${Date.now()}`,
+          observer,
+          message: actionText,
+          scientificName: sciName,
+          type: remoteChange.type,
+        });
+
+        setTimeout(() => {
+          setLiveCollabAlert((current) => (current?.scientificName === sciName ? null : current));
+        }, 7000);
       }
     );
 
@@ -783,6 +843,7 @@ export default function App() {
             onOpenSyncBackup={() => setIsSyncModalOpen(true)}
             onOpenStatistics={() => setActiveView('STATISTICS')}
             onGoHome={() => setActiveView('COVER')}
+            onEditSpecimen={handleOpenEdit}
             onDeleteSpecimen={handleDeleteSpecimen}
           />
         )}
@@ -998,6 +1059,61 @@ export default function App() {
         onResetToInitial={handleResetToInitial}
         onOpenSyncBackup={() => setIsSyncModalOpen(true)}
       />
+
+      {/* Live Real-Time Collaboration Alert Banner */}
+      {liveCollabAlert && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[220] max-w-lg w-[92%] bg-[#002217] text-white p-3.5 rounded-2xl shadow-2xl border-2 border-[#6cf8bb] flex items-center justify-between gap-3 animate-in slide-in-from-top duration-300">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="relative flex items-center justify-center flex-shrink-0">
+              <span className="w-3 h-3 rounded-full bg-[#6cf8bb] animate-ping absolute opacity-75" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#6cf8bb]" />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-center gap-1.5 font-mono text-[10px] text-[#6cf8bb] font-bold uppercase tracking-wider">
+                <span className="material-symbols-outlined text-[13px]">bolt</span>
+                <span>Aporte en Directo • {liveCollabAlert.observer}</span>
+              </div>
+              <span className="font-semibold text-white truncate text-xs">
+                {liveCollabAlert.message}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <button
+              onClick={() => {
+                const found = specimens.find((s) => s.scientificName === liveCollabAlert.scientificName);
+                if (found) {
+                  setCurrentSpecimen(found);
+                  setActiveView('DETAIL');
+                }
+                setLiveCollabAlert(null);
+              }}
+              className="px-2.5 py-1 rounded-lg bg-[#6cf8bb] text-[#002217] font-bold text-xs hover:bg-[#a5d0bc] transition-all cursor-pointer shadow-sm"
+            >
+              Ver Ficha
+            </button>
+            <button
+              onClick={() => setLiveCollabAlert(null)}
+              className="p-1 rounded-lg hover:bg-white/10 text-white/80 hover:text-white cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px]">close</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Offline Mode Indicator Bar */}
+      {!isOnline && (
+        <div className="fixed bottom-16 inset-x-0 z-[190] bg-[#854d0e] text-[#fef9c3] px-3 py-1.5 text-xs font-semibold flex items-center justify-between shadow-lg border-t border-amber-500/50">
+          <div className="flex items-center gap-2 max-w-5xl mx-auto w-full px-2">
+            <span className="material-symbols-outlined text-[16px] text-amber-300">cloud_off</span>
+            <span className="truncate">
+              <strong>Modo de Campo Offline (Sin Internet):</strong> Coordenadas GPS y registros protegidos en este equipo
+              {pendingQueueCount > 0 ? ` • ${pendingQueueCount} pendiente(s) de sincronizar` : ''}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Toast Notification */}
       {syncStatusToast && (

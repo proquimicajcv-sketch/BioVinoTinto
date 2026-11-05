@@ -12,6 +12,7 @@ interface SpecimenCatalogViewProps {
   onOpenSyncBackup?: () => void;
   onOpenStatistics?: () => void;
   onGoHome?: () => void;
+  onEditSpecimen?: (specimen: SpecimenRecord) => void;
   onDeleteSpecimen?: (id: string) => void;
 }
 
@@ -24,10 +25,12 @@ export const SpecimenCatalogView: React.FC<SpecimenCatalogViewProps> = ({
   onOpenSyncBackup,
   onOpenStatistics,
   onGoHome,
+  onEditSpecimen,
   onDeleteSpecimen,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGroup, setSelectedGroup] = useState<string>('ALL');
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   // Quick stats calculation
   const groupStats = useMemo(() => {
@@ -399,10 +402,34 @@ export const SpecimenCatalogView: React.FC<SpecimenCatalogViewProps> = ({
                     <span className="font-mono text-[#006c49] font-bold">
                       {specimen.georeference.elevationMeters} msnm
                     </span>
-                    <span className="text-[#002217] font-bold group-hover:text-[#006c49] flex items-center gap-0.5">
-                      <span>Ver Ficha</span>
-                      <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-                    </span>
+                    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                      {onEditSpecimen && (
+                        <button
+                          type="button"
+                          onClick={() => onEditSpecimen(specimen)}
+                          className="px-2 py-0.5 rounded-lg bg-[#f0f4ee] hover:bg-[#e2e8de] text-[#006c49] font-bold text-[11px] flex items-center gap-1 border border-[#c1c8c3]/40 transition-colors cursor-pointer"
+                          title="Editar datos científicos de esta especie"
+                        >
+                          <span className="material-symbols-outlined text-[13px]">edit</span>
+                          <span>Editar</span>
+                        </button>
+                      )}
+                      {onDeleteSpecimen && specimen.scientificName !== 'Isthmohyla nacientes' && (
+                        <button
+                          type="button"
+                          onClick={() => setDeleteConfirmId(specimen.id)}
+                          className="px-2 py-0.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 font-bold text-[11px] flex items-center gap-1 border border-red-200 transition-colors cursor-pointer"
+                          title="Eliminar esta especie candidata"
+                        >
+                          <span className="material-symbols-outlined text-[13px]">delete</span>
+                          <span>Borrar</span>
+                        </button>
+                      )}
+                      <span className="text-[#002217] font-bold group-hover:text-[#006c49] flex items-center gap-0.5 ml-1">
+                        <span>Ver</span>
+                        <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -420,6 +447,42 @@ export const SpecimenCatalogView: React.FC<SpecimenCatalogViewProps> = ({
           </div>
         )}
       </div>
+
+      {/* Modal de Confirmación para Eliminar Especie */}
+      {deleteConfirmId && (
+        <div className="fixed inset-0 z-[250] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-5 border border-red-200 shadow-2xl flex flex-col gap-3">
+            <div className="w-10 h-10 rounded-full bg-red-100 text-red-700 flex items-center justify-center">
+              <span className="material-symbols-outlined text-[24px]">warning</span>
+            </div>
+            <h3 className="font-bold text-base text-[#191c19]">¿Eliminar esta especie?</h3>
+            <p className="text-xs text-[#414844]">
+              Esta especie y sus avistamientos asociados se eliminarán de este equipo y de la base de datos en la nube.
+            </p>
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#f0f2ec]">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmId(null)}
+                className="px-3.5 py-1.5 rounded-xl border border-[#c1c8c3] text-xs font-bold text-[#414844] hover:bg-[#f0f2ec] cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (onDeleteSpecimen && deleteConfirmId) {
+                    onDeleteSpecimen(deleteConfirmId);
+                  }
+                  setDeleteConfirmId(null);
+                }}
+                className="px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow cursor-pointer"
+              >
+                Sí, Eliminar Especie
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
