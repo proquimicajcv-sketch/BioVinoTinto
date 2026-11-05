@@ -1,0 +1,10 @@
+{
+  "name": "Remix BioBitácora CR - Canopy Field Log",
+  "description": "Sistema de bitácora científica y registro de biodiversidad en Costa Rica con georreferenciación WGS84, bioacústica y sincronización Darwin Core.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

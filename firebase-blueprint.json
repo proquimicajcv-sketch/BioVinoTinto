@@ -1,0 +1,33 @@
+{
+  "entities": {
+    "Specimen": {
+      "title": "Specimen",
+      "description": "Biological specimen record in Costa Rica with scientific taxonomy, georeference, morphometrics, sightings, and photos.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "catalogNumber": { "type": "string" },
+        "scientificName": { "type": "string" },
+        "commonName": { "type": "string" },
+        "taxonGroup": { "type": "string" },
+        "collector": { "type": "string" },
+        "collectionDate": { "type": "string" },
+        "collectionTime": { "type": "string" },
+        "institutionCode": { "type": "string" },
+        "curationStatus": { "type": "string" },
+        "darwinCoreSync": { "type": "boolean" },
+        "fieldFolio": { "type": "string" },
+        "heroImage": { "type": "string" },
+        "heroImageDescription": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "scientificName"]
+    }
+  },
+  "firestore": {
+    "/specimens/{specimenId}": {
+      "schema": "Specimen",
+      "description": "Collection of biological specimens recorded in BioBitácora CR for cross-device real-time synchronization."
+    }
+  }
+}

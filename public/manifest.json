@@ -1,0 +1,32 @@
+{
+  "id": "/",
+  "name": "BioBitácora CR - Rana de las Nacientes",
+  "short_name": "Nacientes CR",
+  "description": "Bitácora científica y registro de campo de Isthmohyla nacientes en Costa Rica.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#002217",
+  "theme_color": "#002217",
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

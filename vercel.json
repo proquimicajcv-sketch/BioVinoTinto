@@ -1,0 +1,11 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/api/ai/identify-specimen", "destination": "/api/identify-specimen" },
+    { "source": "/api/ai/enrich-scientific-data", "destination": "/api/enrich-scientific-data" },
+    { "source": "/api/database/specimens", "destination": "/api/database-specimens" },
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

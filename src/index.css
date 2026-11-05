@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-primary: #002217;
+    --color-primary-container: #0f382a;
+    --color-secondary: #006c49;
+    --color-secondary-container: #6cf8bb;
+    --color-surface: #f8faf4;
+    --color-surface-low: #f2f4ee;
+    --color-surface-container: #edefe9;
+    --color-surface-high: #e7e9e3;
+    --color-surface-highest: #e1e3dd;
+    --color-on-surface: #191c19;
+    --color-on-surface-variant: #414844;
+  }
+
+  html.dark, html[data-theme="dark"] {
+    --color-surface: #061a14;
+    --color-surface-low: #09241c;
+    --color-surface-container: #0d2f25;
+    --color-surface-high: #133c30;
+    --color-surface-highest: #1a4a3c;
+    --color-on-surface: #e6fcf2;
+    --color-on-surface-variant: #9cd6be;
+  }
+
+  html.theme-red, html[data-theme="red"] {
+    --color-surface: #0b0204;
+    --color-surface-low: #150508;
+    --color-surface-container: #20080d;
+    --color-surface-high: #2d0c13;
+    --color-surface-highest: #3e121b;
+    --color-on-surface: #fee2e2;
+    --color-on-surface-variant: #fca5a5;
+  }
+
+  html, body {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: var(--color-surface);
+    color: var(--color-on-surface);
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+}
+
+/* Modo Nocturno de Campo (Cero Deslumbramiento en Quebradas) Overrides */
+html.dark .bg-white {
+  background-color: #0b281f !important;
+  color: #e6fcf2;
+}
+
+html.dark .bg-\[\#f8faf4\] {
+  background-color: #061a14 !important;
+}
+
+html.dark .bg-\[\#f2f4ee\],
+html.dark .bg-\[\#f0f2ec\],
+html.dark .bg-\[\#edefe9\] {
+  background-color: #0d3126 !important;
+}
+
+html.dark .border-\[\#c1c8c3\],
+html.dark .border-\[\#e1e3dd\],
+html.dark .border-\[\#c1c8c3\]\/70,
+html.dark .border-\[\#c1c8c3\]\/80,
+html.dark .border-\[\#e1e3dd\]\/80 {
+  border-color: #174536 !important;
+}
+
+html.dark .text-\[\#002217\],
+html.dark .text-\[\#191c19\] {
+  color: #e6fcf2 !important;
+}
+
+html.dark .text-\[\#414844\] {
+  color: #a5d0bc !important;
+}
+
+html.dark .text-\[\#717974\] {
+  color: #79a691 !important;
+}
+
+html.dark input,
+html.dark select,
+html.dark textarea {
+  background-color: #08221a !important;
+  color: #e6fcf2 !important;
+  border-color: #1b493b !important;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #c1c8c3;
+  border-radius: 9999px;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: #1e4d3d;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #717974;
+}
+
+/* Leaflet map custom overrides */
+.leaflet-container {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  z-index: 10;
+}
+.leaflet-popup-content-wrapper {
+  border-radius: 12px !important;
+  padding: 4px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 34, 23, 0.2) !important;
+}
+.leaflet-popup-content {
+  margin: 8px 12px !important;
+  line-height: 1.4 !important;
+}
+
+/* Print Styles for Executive SINAC Report */
+@media print {
+  body {
+    background-color: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+}
