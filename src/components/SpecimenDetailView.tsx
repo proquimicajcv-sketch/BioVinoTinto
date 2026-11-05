@@ -877,8 +877,8 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
           </div>
         </section>
 
-        {/* BIOACOUSTIC MODULE (ACTIVE OR SUPPRESSED) */}
-        {specimen.bioacoustics ? (
+        {/* BIOACOUSTIC MODULE (ACTIVE ONLY WHEN APPLICABLE AND PRESENT) */}
+        {specimen.bioacoustics && specimen.taxonGroup !== 'Reptilia' && specimen.taxonGroup !== 'Plantae' ? (
           <section className="px-4 mt-4">
             <div className="p-3.5 rounded-xl bg-[#0f382a] text-white shadow-sm flex flex-col gap-2.5">
               <div className="flex items-center justify-between">
@@ -937,7 +937,7 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                 </button>
               </div>
 
-              {/* Bioacoustic Actions (Grabar, Subir o Suprimir) */}
+              {/* Bioacoustic Actions */}
               <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs">
                 <button
                   onClick={() => setIsAudioModalOpen(true)}
@@ -952,7 +952,7 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                   type="button"
                   onClick={handleSuppressBioacoustics}
                   className="px-2.5 py-1 rounded-lg bg-red-950/60 hover:bg-red-900 text-red-200 border border-red-500/50 flex items-center gap-1.5 cursor-pointer transition-all shadow-xs text-[11px] font-bold"
-                  title="Quitar este módulo si la especie no tiene canto o vocalización (ej. serpientes, reptiles, plantas)"
+                  title="Quitar este módulo para que no se visualice ninguna opción sonora"
                 >
                   <span className="material-symbols-outlined text-[15px] text-red-300">volume_off</span>
                   <span>Quitar Bioacústica (No Aplica)</span>
@@ -960,28 +960,7 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
               </div>
             </div>
           </section>
-        ) : (
-          /* Discreto: No aplica bioacústica */
-          <section className="px-4 mt-3">
-            <div className="p-2.5 rounded-xl bg-[#f2f4ee] border border-[#e1e3dd] flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#717974] text-[18px]">volume_off</span>
-                <span className="text-[11px] text-[#414844]">
-                  Bioacústica: <strong>No aplica</strong> a este organismo ({specimen.commonName || specimen.scientificName}).
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsAudioModalOpen(true)}
-                className="px-2.5 py-1 rounded-lg bg-[#002217] hover:bg-[#0f382a] text-[#6cf8bb] text-[11px] font-bold flex items-center gap-1 transition-colors cursor-pointer"
-                title="Añadir canto o llamado si la especie vocaliza"
-              >
-                <span className="material-symbols-outlined text-[13px]">add</span>
-                <span>Activar Canto</span>
-              </button>
-            </div>
-          </section>
-        )}
+        ) : null}
 
         {/* Geo-Location & Habitat Module */}
         <section className="px-4 mt-4">
@@ -1183,33 +1162,6 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                 <p className="text-[13px] text-[#191c19] leading-relaxed font-normal">
                   {specimen.morphometrics.confirmedScientificData}
                 </p>
-              </div>
-            )}
-
-            {specimen.morphometrics.sympatricSpecies.length > 0 && (
-              <div className="p-3 rounded-lg bg-[#f2f4ee] flex flex-col gap-2">
-                <div className="flex items-center gap-1.5 text-[#002217]">
-                  <span className="material-symbols-outlined text-[18px]">group_work</span>
-                  <span className="font-bold text-[14px]">Especies Simpátricas Registradas</span>
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  {specimen.morphometrics.sympatricSpecies.map((symp, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between p-2 rounded bg-white shadow-sm"
-                    >
-                      <div className="min-w-0">
-                        <p className="text-[13px] font-semibold italic text-[#002217] truncate">
-                          {symp.scientificName}
-                        </p>
-                        <p className="text-[11px] text-[#414844]">{symp.commonName}</p>
-                      </div>
-                      <span className="font-mono text-[11px] text-[#006c49] font-bold">
-                        N={symp.count} ind.
-                      </span>
-                    </div>
-                  ))}
-                </div>
               </div>
             )}
           </div>

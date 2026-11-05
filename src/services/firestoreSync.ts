@@ -95,8 +95,11 @@ export function subscribeToSpecimens(
             ...(data as SpecimenRecord),
             id: docSnap.id,
           };
-          if (!rec.bioacoustics || rec.bioacoustics === null) {
+          if (!rec.bioacoustics || rec.bioacoustics === null || rec.taxonGroup === 'Reptilia' || rec.taxonGroup === 'Plantae') {
             delete rec.bioacoustics;
+          }
+          if (rec.morphometrics) {
+            rec.morphometrics.sympatricSpecies = [];
           }
           list.push(rec);
         }

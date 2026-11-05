@@ -269,7 +269,8 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
         setCourtshipNotes(editingSpecimen.morphometrics.courtshipAndMating || '');
         setInterspecificNotes(editingSpecimen.morphometrics.interspecificRelations || '');
         setConfirmedScienceNotes(editingSpecimen.morphometrics.confirmedScientificData || '');
-        setHasBioacoustics(!!editingSpecimen.bioacoustics);
+        const isMuteGroup = editingSpecimen.taxonGroup === 'Reptilia' || editingSpecimen.taxonGroup === 'Plantae';
+        setHasBioacoustics(isMuteGroup ? false : !!editingSpecimen.bioacoustics);
         setAudioTitle(editingSpecimen.bioacoustics?.title || 'Canto de Anuncio');
         setAudioCallType(editingSpecimen.bioacoustics?.callType || 'Vocalización Territorial');
         setAudioFrequency(editingSpecimen.bioacoustics?.dominantFrequencyRange || '1.8 - 2.4 kHz');
@@ -508,7 +509,8 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
     const dms = formatCoordinatesDMS(coords.lat, coords.lng);
     const nearest = findNearestHotspot(coords.lat, coords.lng);
 
-    const bioacousticsRecord: BioacousticRecord | undefined = hasBioacoustics
+    const isMuteTaxon = taxonGroup === 'Reptilia' || taxonGroup === 'Plantae';
+    const bioacousticsRecord: BioacousticRecord | undefined = (!isMuteTaxon && hasBioacoustics)
       ? {
           title: audioTitle,
           callType: audioCallType,
@@ -593,9 +595,7 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
         courtshipAndMating: courtshipNotes,
         interspecificRelations: interspecificNotes,
         confirmedScientificData: confirmedScienceNotes,
-        sympatricSpecies: editingSpecimen?.morphometrics.sympatricSpecies || [
-          { scientificName: 'Dendropsophus ebraccatus', commonName: 'Ranita reloj de arena', count: 3 },
-        ],
+        sympatricSpecies: [],
       },
 
       additionalPhotos: additionalPhotosList,
@@ -741,54 +741,69 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
           </div>
 
           {/* BIOACÚSTICA */}
-          <div className="p-4 rounded-2xl bg-white border border-[#c1c8c3]/80 shadow-sm flex flex-col gap-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <label className="text-xs font-bold text-[#002217] uppercase tracking-wider flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[#006c49] text-[20px]">graphic_eq</span>
-                Registro Bioacústico (Canto / Vocalización)
-              </label>
-
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => setHasBioacoustics(false)}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
-                    !hasBioacoustics
-                      ? 'bg-red-50 text-red-700 border-red-300 shadow-2xs'
-                      : 'bg-white text-[#717974] border-[#c1c8c3]'
-                  }`}
-                >
-                  ❌ No aplica (Mudo / Sin canto)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setHasBioacoustics(true)}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
-                    hasBioacoustics
-                      ? 'bg-[#002217] text-[#6cf8bb] border-[#6cf8bb]/60 shadow-2xs'
-                      : 'bg-white text-[#717974] border-[#c1c8c3]'
-                  }`}
-                >
-                  ✅ Sí aplica (Posee canto)
-                </button>
+          {taxonGroup === 'Reptilia' || taxonGroup === 'Plantae' ? (
+            <div className="p-4 rounded-2xl bg-white border border-[#c1c8c3]/80 shadow-xs flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0 text-gray-500">
+                <span className="material-symbols-outlined text-[22px]">volume_off</span>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-[#002217]">
+                  Bioacústica No Aplicable ({taxonGroup === 'Reptilia' ? 'Reptil / Serpiente' : 'Flora'})
+                </p>
+                <p className="text-[11px] text-[#414844]">
+                  Este grupo no emite vocalizaciones. No se generará ni visualizará ninguna opción de reproducción de canto para este registro.
+                </p>
               </div>
             </div>
+          ) : (
+            <div className="p-4 rounded-2xl bg-white border border-[#c1c8c3]/80 shadow-sm flex flex-col gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <label className="text-xs font-bold text-[#002217] uppercase tracking-wider flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[#006c49] text-[20px]">graphic_eq</span>
+                  Registro Bioacústico (Canto / Vocalización)
+                </label>
 
-            {!hasBioacoustics ? (
-              <div className="p-3 rounded-xl bg-[#f2f4ee] border border-[#e1e3dd] text-xs text-[#414844] flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[#717974] text-[18px]">volume_off</span>
-                  <span>Bioacústica desactivada (no aplica a serpientes, reptiles, plantas u organismos silenciosos).</span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setHasBioacoustics(false)}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
+                      !hasBioacoustics
+                        ? 'bg-red-50 text-red-700 border-red-300 shadow-2xs'
+                        : 'bg-white text-[#717974] border-[#c1c8c3]'
+                    }`}
+                  >
+                    ❌ No aplica (Sin canto)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setHasBioacoustics(true)}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
+                      hasBioacoustics
+                        ? 'bg-[#002217] text-[#6cf8bb] border-[#6cf8bb]/60 shadow-2xs'
+                        : 'bg-white text-[#717974] border-[#c1c8c3]'
+                    }`}
+                  >
+                    ✅ Sí aplica (Posee canto)
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setHasBioacoustics(true)}
-                  className="text-[#006c49] font-bold hover:underline cursor-pointer text-[11px] whitespace-nowrap"
-                >
-                  Activar bioacústica
-                </button>
               </div>
-            ) : (
+
+              {!hasBioacoustics ? (
+                <div className="p-3 rounded-xl bg-[#f2f4ee] border border-[#e1e3dd] text-xs text-[#414844] flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[#717974] text-[18px]">volume_off</span>
+                    <span>Bioacústica desactivada (no se agregará sonido ni reproductor).</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setHasBioacoustics(true)}
+                    className="text-[#006c49] font-bold hover:underline cursor-pointer text-[11px] whitespace-nowrap"
+                  >
+                    Activar bioacústica
+                  </button>
+                </div>
+              ) : (
               <div className="flex flex-col gap-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div className="p-3 rounded-xl bg-[#f8faf4] border border-[#c1c8c3] flex items-center justify-between">
@@ -857,6 +872,7 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
               </div>
             )}
           </div>
+        )}
 
           {/* GEORREFERENCIACIÓN Y ZONA DE VIDA (HOLDRIDGE) - MAPA AUTOMÁTICO & ENTRADA MANUAL */}
           <div className="p-4 rounded-2xl bg-white border border-[#c1c8c3]/80 shadow-sm flex flex-col gap-3">

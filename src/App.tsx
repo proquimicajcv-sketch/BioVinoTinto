@@ -280,6 +280,7 @@ function sanitizeSpecimens(list: SpecimenRecord[]): SpecimenRecord[] {
           morphometrics: {
             ...item.morphometrics,
             courtshipAndMating: INITIAL_SPECIMENS[0].morphometrics.courtshipAndMating,
+            sympatricSpecies: [],
           },
         };
       }
@@ -299,17 +300,19 @@ function sanitizeSpecimens(list: SpecimenRecord[]): SpecimenRecord[] {
       });
 
       let cleanBio = item.bioacoustics;
-      // Para reptiles (ej. Cerrophidion sasai), plantas u organismos silenciosos con bioacústica no aplicable o por defecto
+      // Para reptiles (ej. Cerrophidion sasai), plantas u organismos silenciosos: nunca llevan bioacústica
       if (item.taxonGroup === 'Reptilia' || item.taxonGroup === 'Plantae') {
-        if (cleanBio && (cleanBio.title === 'Canto de Anuncio' || !cleanBio.audioDataUrl)) {
-          cleanBio = undefined;
-        }
+        cleanBio = undefined;
       }
 
       return {
         ...item,
         bioacoustics: cleanBio,
         sightings: realSightings,
+        morphometrics: {
+          ...(item.morphometrics || {}),
+          sympatricSpecies: [],
+        },
       };
     });
 
