@@ -170,7 +170,7 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
 
   // BIOACOUSTICS MANAGEMENT
   const [hasBioacoustics, setHasBioacoustics] = useState<boolean>(
-    editingSpecimen ? !!editingSpecimen.bioacoustics : true
+    editingSpecimen ? !!editingSpecimen.bioacoustics : false
   );
   const [audioTitle, setAudioTitle] = useState(
     editingSpecimen?.bioacoustics?.title || 'Canto de Anuncio'
@@ -309,7 +309,7 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
         setCourtshipNotes('');
         setInterspecificNotes('');
         setConfirmedScienceNotes('');
-        setHasBioacoustics(true);
+        setHasBioacoustics(false);
         setAudioTitle('Canto de Anuncio');
         setAudioCallType('Vocalización Territorial');
         setAudioFrequency('2.0 - 3.0 kHz');
@@ -742,28 +742,51 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
 
           {/* BIOACÚSTICA */}
           <div className="p-4 rounded-2xl bg-white border border-[#c1c8c3]/80 shadow-sm flex flex-col gap-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <label className="text-xs font-bold text-[#002217] uppercase tracking-wider flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[#006c49] text-[20px]">graphic_eq</span>
-                Registro Bioacústico (Canto / Llamado)
+                Registro Bioacústico (Canto / Vocalización)
               </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={hasBioacoustics}
-                  onChange={(e) => setHasBioacoustics(e.target.checked)}
-                  className="w-4 h-4 rounded text-[#006c49] focus:ring-[#006c49] accent-[#006c49]"
-                />
-                <span className="text-xs font-semibold text-[#191c19]">
-                  {hasBioacoustics ? 'Canto Activo' : 'Suprimido (Sin canto)'}
-                </span>
-              </label>
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setHasBioacoustics(false)}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
+                    !hasBioacoustics
+                      ? 'bg-red-50 text-red-700 border-red-300 shadow-2xs'
+                      : 'bg-white text-[#717974] border-[#c1c8c3]'
+                  }`}
+                >
+                  ❌ No aplica (Mudo / Sin canto)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setHasBioacoustics(true)}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
+                    hasBioacoustics
+                      ? 'bg-[#002217] text-[#6cf8bb] border-[#6cf8bb]/60 shadow-2xs'
+                      : 'bg-white text-[#717974] border-[#c1c8c3]'
+                  }`}
+                >
+                  ✅ Sí aplica (Posee canto)
+                </button>
+              </div>
             </div>
 
             {!hasBioacoustics ? (
-              <div className="p-3 rounded-xl bg-[#f2f4ee] border border-[#e1e3dd] text-xs text-[#414844] flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#717974] text-[18px]">volume_off</span>
-                <span>Organismo sin canto o llamado emitido (suprimido para plantas, mariposas, reptiles mudos, etc.).</span>
+              <div className="p-3 rounded-xl bg-[#f2f4ee] border border-[#e1e3dd] text-xs text-[#414844] flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[#717974] text-[18px]">volume_off</span>
+                  <span>Bioacústica desactivada (no aplica a serpientes, reptiles, plantas u organismos silenciosos).</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setHasBioacoustics(true)}
+                  className="text-[#006c49] font-bold hover:underline cursor-pointer text-[11px] whitespace-nowrap"
+                >
+                  Activar bioacústica
+                </button>
               </div>
             ) : (
               <div className="flex flex-col gap-3">
@@ -1215,14 +1238,20 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
               </label>
               <select
                 value={taxonGroup}
-                onChange={(e) => setTaxonGroup(e.target.value as TaxonGroup)}
+                onChange={(e) => {
+                  const newGroup = e.target.value as TaxonGroup;
+                  setTaxonGroup(newGroup);
+                  if (newGroup === 'Reptilia' || newGroup === 'Plantae' || newGroup === 'Insecta') {
+                    setHasBioacoustics(false);
+                  }
+                }}
                 className="w-full px-3 py-2 rounded-lg bg-white border border-[#c1c8c3] text-sm text-[#191c19]"
               >
                 <option value="Amphibia">Anfibio (Amphibia)</option>
                 <option value="Aves">Ave (Aves)</option>
                 <option value="Mammalia">Mamífero (Mammalia)</option>
                 <option value="Insecta">Insecto / Artrópodo (Insecta)</option>
-                <option value="Reptilia">Reptil (Reptilia)</option>
+                <option value="Reptilia">Reptil / Serpiente (Reptilia)</option>
                 <option value="Plantae">Flora (Plantae)</option>
               </select>
             </div>

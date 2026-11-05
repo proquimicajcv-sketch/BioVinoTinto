@@ -286,13 +286,13 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
     }
   };
 
-  // Suppress bioacoustics for silent organisms
+  // Suppress bioacoustics when not applicable (silent organisms, snakes, plants, etc.)
   const handleSuppressBioacoustics = () => {
-    if (window.confirm('¿Desea suprimir el módulo de audio para este espécimen (marcarlo como organismo sin canto/llamado)?')) {
-      audioPlaybackController?.stop();
-      setIsPlayingAudio(false);
-      onUpdateBioacoustics(specimen.id, undefined);
-    }
+    audioPlaybackController?.stop();
+    setIsPlayingAudio(false);
+    onUpdateBioacoustics(specimen.id, undefined);
+    setSaveSuccessMsg('Módulo de bioacústica retirado (marcado como no aplicable para este organismo).');
+    setTimeout(() => setSaveSuccessMsg(null), 3500);
   };
 
   const handleOpenAddSighting = () => {
@@ -947,37 +947,37 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                   <span>{specimen.bioacoustics.audioDataUrl ? 'Cambiar Grabación' : 'Grabar / Subir Audio'}</span>
                 </button>
 
-                {/* BOTÓN PARA SUPRIMIR CANTO POR DEFECTO */}
+                {/* BOTÓN PARA QUITAR BIOACÚSTICA */}
                 <button
+                  type="button"
                   onClick={handleSuppressBioacoustics}
-                  className="text-red-300 hover:text-red-100 flex items-center gap-1 cursor-pointer"
-                  title="Suprimir módulo si el organismo no posee canto o llamado"
+                  className="px-2.5 py-1 rounded-lg bg-red-950/60 hover:bg-red-900 text-red-200 border border-red-500/50 flex items-center gap-1.5 cursor-pointer transition-all shadow-xs text-[11px] font-bold"
+                  title="Quitar este módulo si la especie no tiene canto o vocalización (ej. serpientes, reptiles, plantas)"
                 >
-                  <span className="material-symbols-outlined text-[14px]">volume_off</span>
-                  <span>Suprimir Canto (Organismo mudo)</span>
+                  <span className="material-symbols-outlined text-[15px] text-red-300">volume_off</span>
+                  <span>Quitar Bioacústica (No Aplica)</span>
                 </button>
               </div>
             </div>
           </section>
         ) : (
-          /* Silent Organism Card with option to add audio */
-          <section className="px-4 mt-4">
-            <div className="p-3.5 rounded-xl bg-white border border-[#e1e3dd] shadow-sm flex items-center justify-between">
+          /* Discreto: No aplica bioacústica */
+          <section className="px-4 mt-3">
+            <div className="p-2.5 rounded-xl bg-[#f2f4ee] border border-[#e1e3dd] flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#717974] text-[20px]">volume_off</span>
-                <div>
-                  <h4 className="font-bold text-xs text-[#002217]">Sin Registro Bioacústico</h4>
-                  <p className="text-[11px] text-[#414844]">
-                    Organismo sin vocalizaciones asignadas (mudo).
-                  </p>
-                </div>
+                <span className="material-symbols-outlined text-[#717974] text-[18px]">volume_off</span>
+                <span className="text-[11px] text-[#414844]">
+                  Bioacústica: <strong>No aplica</strong> a este organismo ({specimen.commonName || specimen.scientificName}).
+                </span>
               </div>
               <button
+                type="button"
                 onClick={() => setIsAudioModalOpen(true)}
-                className="px-3 py-1.5 rounded-lg bg-[#002217] hover:bg-[#0f382a] text-white text-xs font-bold flex items-center gap-1 shadow-sm cursor-pointer"
+                className="px-2.5 py-1 rounded-lg bg-[#002217] hover:bg-[#0f382a] text-[#6cf8bb] text-[11px] font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                title="Añadir canto o llamado si la especie vocaliza"
               >
-                <span className="material-symbols-outlined text-[15px] text-[#6cf8bb]">mic</span>
-                <span>Grabar o Subir Audio</span>
+                <span className="material-symbols-outlined text-[13px]">add</span>
+                <span>Activar Canto</span>
               </button>
             </div>
           </section>

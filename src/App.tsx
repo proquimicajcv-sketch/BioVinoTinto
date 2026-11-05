@@ -157,10 +157,15 @@ function mergeSpecimenLists(existingList: SpecimenRecord[], incomingList: Specim
       const oldHeroCustom = oldHero && (oldHero.startsWith('/uploads/') || oldHero.startsWith('data:'));
       const finalHero = incomingHeroCustom ? incomingHero : (oldHeroCustom ? oldHero : incomingHero || oldHero);
 
+      const mergedBio = ('bioacoustics' in incoming)
+        ? (incoming.bioacoustics || undefined)
+        : existing.bioacoustics;
+
       result[idx] = {
         ...existing,
         ...incoming,
         heroImage: finalHero,
+        bioacoustics: mergedBio,
         sightings: mergedSightings,
         additionalPhotos: Array.from(photoMap.values()),
       };
@@ -292,8 +297,18 @@ function sanitizeSpecimens(list: SpecimenRecord[]): SpecimenRecord[] {
         const dateB = b.date || b.timestamp || '';
         return dateB.localeCompare(dateA);
       });
+
+      let cleanBio = item.bioacoustics;
+      // Para reptiles (ej. Cerrophidion sasai), plantas u organismos silenciosos con bioacústica no aplicable o por defecto
+      if (item.taxonGroup === 'Reptilia' || item.taxonGroup === 'Plantae') {
+        if (cleanBio && (cleanBio.title === 'Canto de Anuncio' || !cleanBio.audioDataUrl)) {
+          cleanBio = undefined;
+        }
+      }
+
       return {
         ...item,
+        bioacoustics: cleanBio,
         sightings: realSightings,
       };
     });
@@ -604,11 +619,16 @@ export default function App() {
     persistSpecimens(filtered);
   };
 
-  // Handle updating bioacoustics directly
+  // Handle updating bioacoustics directly (or removing it when bioacoustics is undefined)
   const handleUpdateBioacoustics = (specimenId: string, bioacoustics?: BioacousticRecord) => {
     const updated = specimens.map((s) => {
       if (s.id === specimenId) {
-        const item = { ...s, bioacoustics };
+        const item: SpecimenRecord = { ...s };
+        if (bioacoustics) {
+          item.bioacoustics = bioacoustics;
+        } else {
+          delete item.bioacoustics;
+        }
         if (currentSpecimen.id === specimenId) {
           setCurrentSpecimen(item);
         }

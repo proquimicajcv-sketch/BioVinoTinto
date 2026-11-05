@@ -91,10 +91,14 @@ export function subscribeToSpecimens(
       snapshot.forEach((docSnap) => {
         const data = docSnap.data();
         if (data && data.scientificName) {
-          list.push({
+          const rec: SpecimenRecord = {
             ...(data as SpecimenRecord),
             id: docSnap.id,
-          });
+          };
+          if (!rec.bioacoustics || rec.bioacoustics === null) {
+            delete rec.bioacoustics;
+          }
+          list.push(rec);
         }
       });
 
@@ -140,6 +144,7 @@ export async function saveSpecimenToCloud(specimen: SpecimenRecord): Promise<voi
     const docRef = doc(db, 'specimens', specimen.id);
     // Sanitize undefined fields which Firestore rejects
     const cleanData = JSON.parse(JSON.stringify(specimen));
+    cleanData.bioacoustics = specimen.bioacoustics || null;
     cleanData.updatedAt = new Date().toISOString();
     await setDoc(docRef, cleanData, { merge: true });
   } catch (error) {
@@ -181,6 +186,7 @@ export async function batchSyncSpecimensToCloud(specimens: SpecimenRecord[]): Pr
       if (s && s.id) {
         const ref = doc(db, 'specimens', s.id);
         const clean = JSON.parse(JSON.stringify(s));
+        clean.bioacoustics = s.bioacoustics || null;
         clean.updatedAt = new Date().toISOString();
         batch.set(ref, clean, { merge: true });
       }
