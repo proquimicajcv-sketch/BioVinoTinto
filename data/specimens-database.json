@@ -62,23 +62,7 @@
       "courtshipAndMating": "Cortejo es un llamado del macho constante y la hembra se acerca, no hay más datos en este momento de verificación científica.",
       "interspecificRelations": "Congénere de las ranas de montaña de Talamanca Isthmohyla rivularis e Isthmohyla tica, con las cuales fue confundida en colectas históricas de la década de 1960 hasta que análisis moleculares y bioacústicos en 2026 demostraron su independencia evolutiva. Comparte microhábitat ribereño con ranitas de hojarasca Craugastor podiciferus y Pristimantis cruentus. Es una especie bioindicadora clave de la pureza de las fuentes hídricas de la región.",
       "confirmedScientificData": "Descrita formalmente a inicios de 2026 en la revista científica Ichthyology & Herpetology por los investigadores Wagner Chaves-Acuña, Juan Abarca, Jonathan Navarro-Picado, Esteban Hidalgo-Mora, Marilyn Ureña-Chaves, Alejandro Valverde-Castillo, Gerardo Chaves, Federico Bolaños y Julián Faivovich. Especie endémica de Costa Rica redescubierta en San Lorenzo de Tarrazú en 2021 y validada mediante evidencia integrativa genética, morfológica y bioacústica.",
-      "sympatricSpecies": [
-        {
-          "scientificName": "Craugastor podiciferus",
-          "commonName": "Ranita de hojarasca de Talamanca",
-          "count": 3
-        },
-        {
-          "scientificName": "Pristimantis cruentus",
-          "commonName": "Ranita chirriadora de montaña",
-          "count": 2
-        },
-        {
-          "scientificName": "Isthmohyla rivularis",
-          "commonName": "Rana de torrente de Talamanca",
-          "count": 1
-        }
-      ]
+      "sympatricSpecies": []
     },
     "additionalPhotos": [
       {

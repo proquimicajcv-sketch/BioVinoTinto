@@ -126,6 +126,24 @@ function formatSightingTimestamp(dateYmd: string, timeHm?: string): string {
   }
 }
 
+export function isSilentOrganism(specimen?: SpecimenRecord | null): boolean {
+  if (!specimen) return true;
+  if (!specimen.bioacoustics) return true;
+  const group = (specimen.taxonGroup || '').trim().toLowerCase();
+  const cls = (specimen.taxonomy?.class || '').trim().toLowerCase();
+  const ord = (specimen.taxonomy?.order || '').trim().toLowerCase();
+  const sci = (specimen.scientificName || '').trim().toLowerCase();
+  const com = (specimen.commonName || '').trim().toLowerCase();
+
+  // Reptiles, serpientes, plantas, flora, organismos mudos
+  if (group.includes('reptil') || cls.includes('reptil') || ord.includes('squamata') || ord.includes('serpentes')) return true;
+  if (group.includes('plant') || cls.includes('plant') || group.includes('flora')) return true;
+  if (sci.includes('cerrophid') || sci.includes('bothriechis') || sci.includes('bothrops') || sci.includes('crotalus')) return true;
+  if (com.includes('toboba') || com.includes('serpiente') || com.includes('culebra') || com.includes('víbora') || com.includes('vibora')) return true;
+
+  return false;
+}
+
 interface SpecimenDetailViewProps {
   specimen: SpecimenRecord;
   onBack: () => void;
@@ -866,7 +884,11 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
               <span className="text-[#c1c8c3] font-bold">&gt;</span>
               <span className="px-2 py-0.5 rounded bg-white shadow-sm">{specimen.taxonomy.class}</span>
               <span className="text-[#c1c8c3] font-bold">&gt;</span>
-              <span className="px-2 py-0.5 rounded bg-white shadow-sm">{specimen.taxonomy.order}</span>
+              <span className="px-2 py-0.5 rounded bg-white shadow-sm">
+                {(specimen.taxonGroup?.toLowerCase().includes('reptil') && specimen.taxonomy.order === 'Anura')
+                  ? 'Squamata'
+                  : specimen.taxonomy.order}
+              </span>
               <span className="text-[#c1c8c3] font-bold">&gt;</span>
               <span className="px-2 py-0.5 rounded bg-white shadow-sm">{specimen.taxonomy.family}</span>
               <span className="text-[#c1c8c3] font-bold">&gt;</span>
@@ -877,8 +899,8 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
           </div>
         </section>
 
-        {/* BIOACOUSTIC MODULE (ACTIVE ONLY WHEN APPLICABLE AND PRESENT) */}
-        {specimen.bioacoustics && specimen.taxonGroup !== 'Reptilia' && specimen.taxonGroup !== 'Plantae' ? (
+        {/* BIOACOUSTIC MODULE: ONLY rendered if NOT a silent organism */}
+        {specimen.bioacoustics && !isSilentOrganism(specimen) ? (
           <section className="px-4 mt-4">
             <div className="p-3.5 rounded-xl bg-[#0f382a] text-white shadow-sm flex flex-col gap-2.5">
               <div className="flex items-center justify-between">

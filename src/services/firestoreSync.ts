@@ -95,7 +95,17 @@ export function subscribeToSpecimens(
             ...(data as SpecimenRecord),
             id: docSnap.id,
           };
-          if (!rec.bioacoustics || rec.bioacoustics === null || rec.taxonGroup === 'Reptilia' || rec.taxonGroup === 'Plantae') {
+          const isSilent =
+            !rec.bioacoustics ||
+            rec.bioacoustics === null ||
+            rec.taxonGroup === 'Reptilia' ||
+            rec.taxonGroup === 'Plantae' ||
+            rec.taxonomy?.class === 'Reptilia' ||
+            rec.taxonomy?.class === 'Plantae' ||
+            rec.scientificName?.toLowerCase().includes('cerrophid') ||
+            rec.commonName?.toLowerCase().includes('toboba');
+
+          if (isSilent) {
             delete rec.bioacoustics;
           }
           if (rec.morphometrics) {

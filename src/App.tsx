@@ -157,9 +157,22 @@ function mergeSpecimenLists(existingList: SpecimenRecord[], incomingList: Specim
       const oldHeroCustom = oldHero && (oldHero.startsWith('/uploads/') || oldHero.startsWith('data:'));
       const finalHero = incomingHeroCustom ? incomingHero : (oldHeroCustom ? oldHero : incomingHero || oldHero);
 
-      const mergedBio = ('bioacoustics' in incoming)
+      const isMuteIncoming =
+        incoming.taxonGroup === 'Reptilia' ||
+        incoming.taxonGroup === 'Plantae' ||
+        incoming.taxonomy?.class === 'Reptilia' ||
+        incoming.scientificName?.toLowerCase().includes('cerrophid') ||
+        existing.taxonGroup === 'Reptilia' ||
+        existing.taxonGroup === 'Plantae' ||
+        existing.scientificName?.toLowerCase().includes('cerrophid');
+
+      let mergedBio = ('bioacoustics' in incoming)
         ? (incoming.bioacoustics || undefined)
         : existing.bioacoustics;
+
+      if (isMuteIncoming) {
+        mergedBio = undefined;
+      }
 
       result[idx] = {
         ...existing,
@@ -299,14 +312,38 @@ function sanitizeSpecimens(list: SpecimenRecord[]): SpecimenRecord[] {
         return dateB.localeCompare(dateA);
       });
 
+      const isMute =
+        item.taxonGroup === 'Reptilia' ||
+        item.taxonGroup === 'Plantae' ||
+        item.taxonomy?.class === 'Reptilia' ||
+        item.taxonomy?.class === 'Plantae' ||
+        item.scientificName?.toLowerCase().includes('cerrophid') ||
+        item.scientificName?.toLowerCase().includes('bothriechis') ||
+        item.scientificName?.toLowerCase().includes('bothrops') ||
+        item.scientificName?.toLowerCase().includes('crotalus') ||
+        item.commonName?.toLowerCase().includes('toboba') ||
+        item.commonName?.toLowerCase().includes('serpiente') ||
+        item.commonName?.toLowerCase().includes('culebra');
+
       let cleanBio = item.bioacoustics;
-      // Para reptiles (ej. Cerrophidion sasai), plantas u organismos silenciosos: nunca llevan bioacústica
-      if (item.taxonGroup === 'Reptilia' || item.taxonGroup === 'Plantae') {
+      if (isMute) {
         cleanBio = undefined;
+      }
+
+      let cleanTaxonomy = item.taxonomy;
+      if (isMute && item.taxonomy) {
+        if (item.taxonomy.order === 'Anura' || !item.taxonomy.order) {
+          cleanTaxonomy = {
+            ...item.taxonomy,
+            class: item.taxonGroup || 'Reptilia',
+            order: item.taxonGroup === 'Plantae' ? 'Polypodiales' : 'Squamata',
+          };
+        }
       }
 
       return {
         ...item,
+        taxonomy: cleanTaxonomy,
         bioacoustics: cleanBio,
         sightings: realSightings,
         morphometrics: {

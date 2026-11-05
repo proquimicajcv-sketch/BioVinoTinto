@@ -559,10 +559,21 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
       },
 
       taxonomy: {
-        kingdom: 'Animalia',
-        phylum: 'Chordata',
+        kingdom: taxonGroup === 'Plantae' ? 'Plantae' : 'Animalia',
+        phylum: taxonGroup === 'Plantae' ? 'Tracheophyta' : taxonGroup === 'Insecta' ? 'Arthropoda' : 'Chordata',
         class: taxonGroup,
-        order: 'Anura',
+        order:
+          taxonGroup === 'Reptilia'
+            ? 'Squamata'
+            : taxonGroup === 'Aves'
+            ? 'Passeriformes'
+            : taxonGroup === 'Mammalia'
+            ? 'Carnivora'
+            : taxonGroup === 'Insecta'
+            ? 'Lepidoptera'
+            : taxonGroup === 'Plantae'
+            ? 'Polypodiales'
+            : 'Anura',
         family,
         genus,
         species: scientificName.split(' ')[1] || 'sp.',
