@@ -523,6 +523,7 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
       observer: collector || 'Investigador de Campo',
       locality: newSightingLocality.trim() || locality,
       count: newSightingCount > 0 ? newSightingCount : 1,
+      individualsCount: newSightingCount > 0 ? newSightingCount : 1,
       behaviorObserved: newSightingBehavior.trim() || 'Observación registrada en campo.',
       microhabitat: microhabitat,
       notes: newSightingNotes.trim() || undefined,
@@ -549,7 +550,7 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
 
     let finalHero = (heroImage || '').trim();
     if (!finalHero) {
-      finalHero = getTaxonFallbackImage(taxonGroup, scientificName);
+      finalHero = editingSpecimen?.heroImage || getTaxonFallbackImage(taxonGroup, scientificName);
     } else if (finalHero.startsWith('http://') || finalHero.startsWith('https://')) {
       try {
         const resp = await fetch('/api/cache-remote-image', {
@@ -727,13 +728,13 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 overflow-y-auto flex flex-col gap-5">
+        <form onSubmit={handleSubmit} noValidate className="p-5 overflow-y-auto flex flex-col gap-5">
           {/* FOTOGRAFÍA PRINCIPAL DEL ESPÉCIMEN */}
           <div className="p-4 rounded-2xl bg-white border border-[#c1c8c3]/80 shadow-sm flex flex-col gap-3">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <label className="text-xs font-bold text-[#002217] uppercase tracking-wider flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[#006c49] text-[20px]">add_a_photo</span>
-                Fotografía Principal de Campo
+                Fotografía Principal de Campo (Opcional)
               </label>
               {heroImage && (
                 <span className="text-[11px] font-mono text-[#006c49] font-bold bg-[#6cf8bb]/20 px-2.5 py-0.5 rounded-full border border-[#006c49]/20">
@@ -763,7 +764,7 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center text-[#79a28f] gap-1 p-2 text-center text-xs">
                     <span className="material-symbols-outlined text-3xl">image</span>
-                    <span>Sin fotografía</span>
+                    <span>Sin fotografía (Opcional)</span>
                   </div>
                 )}
                 {heroImage && (
@@ -795,17 +796,17 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
                         className="hidden"
                       />
                     </label>
-                    <span className="text-xs text-[#717974]">o ingresar enlace web:</span>
+                    <span className="text-xs text-[#717974]">o ingresar enlace web / ruta:</span>
                   </div>
 
                   <input
-                    type="url"
+                    type="text"
                     value={heroImage}
                     onChange={(e) => {
                       setHeroImage(e.target.value);
                       setUploadedBase64(null);
                     }}
-                    placeholder="https://ejemplo.com/fotografia.jpg"
+                    placeholder="https://ejemplo.com/fotografia.jpg o ruta interna"
                     className="w-full px-3 py-2 rounded-lg bg-white border border-[#c1c8c3] text-xs font-mono text-[#191c19] focus:outline-none focus:ring-2 focus:ring-[#006c49]"
                   />
                 </div>
@@ -1583,10 +1584,10 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
               {/* Campos opcionales de URL, Etiqueta y Descripción */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <input
-                  type="url"
+                  type="text"
                   value={newPhotoUrl}
                   onChange={(e) => setNewPhotoUrl(e.target.value)}
-                  placeholder="https://... URL pública de la imagen (opcional)"
+                  placeholder="https://... URL pública o ruta (opcional)"
                   className="px-3 py-2 rounded-lg bg-white border border-[#c1c8c3] text-xs text-[#191c19] focus:ring-2 focus:ring-[#006c49]"
                 />
                 <input

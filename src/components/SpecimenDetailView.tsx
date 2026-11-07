@@ -409,12 +409,12 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
     let recordDate = '';
 
     if (sightingPrecision === 'exact') {
-      recordDate = sightingDate;
-      formattedTimestamp = formatSightingTimestamp(sightingDate, sightingTime);
+      recordDate = sightingDate || new Date().toISOString().slice(0, 10);
+      formattedTimestamp = formatSightingTimestamp(recordDate, sightingTime || '20:00');
     } else {
       // Mes y Año aproximado (ej: 2026-03 -> Marzo 2026)
-      recordDate = sightingMonthYear;
-      const [year, month] = sightingMonthYear.split('-');
+      recordDate = sightingMonthYear || new Date().toISOString().slice(0, 7);
+      const [year, month] = recordDate.split('-');
       const monthNames = [
         'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
         'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
@@ -428,18 +428,20 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
       localStorage.setItem('biobitacora_cr_observer_name', finalObserver);
     } catch {}
 
+    const countNum = Math.max(1, Number(sightingCount) || 1);
+
     const sightingPayload: SightingEntry = {
       id: editingSightingId || 'sight-' + Date.now(),
       timestamp: formattedTimestamp,
       date: recordDate,
       observer: finalObserver,
-      locality: sightingLocality.trim() || specimen.georeference.locality,
-      coordinates: sightingCoordsDms,
-      count: Number(sightingCount) || 1,
-      individualsCount: Number(sightingCount) || 1,
-      microhabitat: sightingMicrohabitat.trim() || specimen.georeference.microhabitat,
-      weather: sightingWeather.trim(),
-      weatherConditions: sightingWeather.trim(),
+      locality: sightingLocality.trim() || specimen.georeference.locality || 'Zona de los Santos',
+      coordinates: sightingCoordsDms || `${specimen.georeference.latitudeDMS}, ${specimen.georeference.longitudeDMS}`,
+      count: countNum,
+      individualsCount: countNum,
+      microhabitat: sightingMicrohabitat.trim() || specimen.georeference.microhabitat || 'Follaje ripario sobre quebrada',
+      weather: sightingWeather.trim() || 'Condiciones de montaña',
+      weatherConditions: sightingWeather.trim() || 'Condiciones de montaña',
       behaviorObserved: sightingBehavior.trim() || 'Avistamiento de espécimen activo en su entorno silvestre.',
       notes: sightingNotes.trim()
         ? `${sightingNotes.trim()}${sightingLifeZone ? ` • Zona: ${sightingLifeZone}` : ''}`
@@ -449,12 +451,12 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
       curiousFindingDescription: sightingIsCurious ? sightingCuriousDesc.trim() : undefined,
       curiousFindingPhoto: sightingIsCurious ? sightingCuriousPhoto : undefined,
       photoUrls: sightingCuriousPhoto ? [sightingCuriousPhoto] : undefined,
-      vitalityStatus: sightingVitality,
+      vitalityStatus: sightingVitality || 'VIVO',
       vitalityCause: sightingVitality === 'MUERTO' ? sightingVitalityCause : undefined,
       vitalityCauseDetail: sightingVitality === 'MUERTO' ? sightingVitalityDetail.trim() : undefined,
-      lifeStage: sightingLifeStage,
-      sex: sightingSex,
-      gpsSource: sightingGpsSource,
+      lifeStage: sightingLifeStage || 'ADULTO',
+      sex: sightingSex || 'NO_APLICA',
+      gpsSource: sightingGpsSource || 'MAP_SELECTION',
       deviceAccuracyMeters: sightingGpsAccuracy || undefined,
     };
 
@@ -514,6 +516,49 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
         : '¡Nuevo avistamiento guardado permanentemente y ordenado por fecha de visita!'
     );
     setTimeout(() => setSaveSuccessMsg(null), 4000);
+  };
+
+  const handleQuickAddSighting = (count: number = 1) => {
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0, 10);
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const ts = formatSightingTimestamp(dateStr, timeStr);
+    const finalObserver = currentObserverName || 'Ing. Carvajal V.';
+
+    const newSighting: SightingEntry = {
+      id: 'sight-' + Date.now(),
+      timestamp: ts,
+      date: dateStr,
+      observer: finalObserver,
+      locality: specimen.georeference.locality || 'Zona de los Santos',
+      coordinates: `${specimen.georeference.latitudeDMS}, ${specimen.georeference.longitudeDMS}`,
+      count: count,
+      individualsCount: count,
+      microhabitat: specimen.georeference.microhabitat || 'Follaje ripario sobre quebrada',
+      behaviorObserved: 'Avistamiento activo en hábitat natural.',
+      vitalityStatus: 'VIVO',
+      lifeStage: 'ADULTO',
+      sex: 'NO_APLICA',
+      gpsSource: 'MAP_SELECTION',
+    };
+
+    const updatedList = [newSighting, ...(specimen.sightings || [])].sort((a, b) => {
+      const keyA = `${parseDateToYmd(a.date, a.timestamp)} ${parseTimeToHm(a.timestamp)}`;
+      const keyB = `${parseDateToYmd(b.date, b.timestamp)} ${parseTimeToHm(b.timestamp)}`;
+      return keyB.localeCompare(keyA);
+    });
+
+    const updatedSpecimen: SpecimenRecord = {
+      ...specimen,
+      sightings: updatedList,
+    };
+
+    if (onSaveSpecimen) {
+      onSaveSpecimen(updatedSpecimen);
+    }
+
+    setSaveSuccessMsg(`¡Avistamiento rápido (+${count} ind.) guardado y reflejado en estadísticas!`);
+    setTimeout(() => setSaveSuccessMsg(null), 3500);
   };
 
   // Verificación de autoría o clave de seguridad (5531)
@@ -1564,13 +1609,25 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                 <span className="material-symbols-outlined text-[#006c49] text-[20px]">visibility</span>
                 Historial de Avistamientos &amp; Entradas ({specimen.sightings?.length || 0} en total • {specimen.sightings && specimen.sightings.length > 0 ? specimen.sightings.reduce((acc, s) => acc + (s.count || s.individualsCount || 0), 0) : 0} individuos observados)
               </h3>
-              <button
-                onClick={handleOpenAddSighting}
-                className="px-3 py-1.5 rounded-lg bg-[#002217] hover:bg-[#003d2b] text-[#6cf8bb] text-xs font-bold flex items-center gap-1 shadow-sm transition-all cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-[16px]">add_circle</span>
-                <span>+ Nuevo Avistamiento</span>
-              </button>
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => handleQuickAddSighting(1)}
+                  className="px-3 py-1.5 rounded-lg bg-[#6cf8bb] hover:bg-[#a5d0bc] text-[#002217] text-xs font-black flex items-center gap-1 shadow-sm transition-all cursor-pointer"
+                  title="Registrar 1 avistamiento rápidamente hoy sin llenar formularios"
+                >
+                  <span className="material-symbols-outlined text-[16px]">bolt</span>
+                  <span>⚡ +1 Rápido Hoy</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleOpenAddSighting}
+                  className="px-3 py-1.5 rounded-lg bg-[#002217] hover:bg-[#003d2b] text-[#6cf8bb] text-xs font-bold flex items-center gap-1 shadow-sm transition-all cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[16px]">add_circle</span>
+                  <span>+ Formulario Detallado</span>
+                </button>
+              </div>
             </div>
 
             <div className="flex flex-col gap-2">
@@ -1838,13 +1895,13 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
               </button>
             </div>
 
-            <form onSubmit={handleSaveDirectSighting} className="flex flex-col gap-3">
+            <form onSubmit={handleSaveDirectSighting} noValidate className="flex flex-col gap-3">
               {/* Fecha y Hora del Avistamiento (Día y Hora editables para avistamientos anteriores) */}
               <div className="p-3 rounded-xl bg-[#f0f5ee] border border-[#c1d0c4] flex flex-col gap-2.5">
                 <div className="flex items-center justify-between flex-wrap gap-1">
                   <label className="text-[11px] font-bold text-[#002217] uppercase flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[16px] text-[#006c49]">calendar_clock</span>
-                    <span>Fecha y Hora del Avistamiento *</span>
+                    <span>Fecha y Hora del Avistamiento</span>
                   </label>
                   <div className="flex items-center gap-1 bg-white p-0.5 rounded-lg border border-[#c1c8c3] text-[10px]">
                     <button
@@ -1877,11 +1934,10 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="block text-[10px] font-bold text-[#414844] uppercase mb-1">
-                        Día / Fecha del Avistamiento *
+                        Día / Fecha del Avistamiento
                       </label>
                       <input
                         type="date"
-                        required
                         value={sightingDate}
                         onChange={(e) => setSightingDate(e.target.value)}
                         className="w-full px-3 py-2 rounded-xl border border-[#c1c8c3] bg-white text-xs font-mono font-bold text-[#191c19] focus:outline-none focus:ring-2 focus:ring-[#006c49]"
@@ -1889,11 +1945,10 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold text-[#414844] uppercase mb-1">
-                        Hora (Formato 24h CST) *
+                        Hora (Formato 24h CST)
                       </label>
                       <input
                         type="time"
-                        required
                         value={sightingTime}
                         onChange={(e) => setSightingTime(e.target.value)}
                         className="w-full px-3 py-2 rounded-xl border border-[#c1c8c3] bg-white text-xs font-mono font-bold text-[#191c19] focus:outline-none focus:ring-2 focus:ring-[#006c49]"
@@ -1903,11 +1958,10 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                 ) : (
                   <div>
                     <label className="block text-[10px] font-bold text-[#414844] uppercase mb-1">
-                      Mes y Año del Avistamiento Anterior *
+                      Mes y Año del Avistamiento Anterior
                     </label>
                     <input
                       type="month"
-                      required
                       value={sightingMonthYear}
                       onChange={(e) => setSightingMonthYear(e.target.value)}
                       className="w-full px-3 py-2 rounded-xl border border-[#c1c8c3] bg-white text-xs font-mono font-bold text-[#191c19] focus:outline-none focus:ring-2 focus:ring-[#006c49]"
@@ -1970,7 +2024,7 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                 <div className="flex items-center justify-between">
                   <label className="text-[11px] font-bold text-[#002217] uppercase flex items-center gap-1">
                     <span className="material-symbols-outlined text-[16px] text-[#006c49]">person</span>
-                    Nombre del Observador(a) / Colaborador(a) *
+                    Nombre del Observador(a) / Colaborador(a)
                   </label>
                   <span className="text-[10px] text-[#006c49] font-mono font-bold bg-[#6cf8bb]/20 px-2 py-0.5 rounded-full">
                     Aporte Identificado
@@ -1978,14 +2032,13 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                 </div>
                 <input
                   type="text"
-                  required
                   value={sightingObserver}
                   onChange={(e) => setSightingObserver(e.target.value)}
-                  placeholder="Tu nombre (ej: Carlos Mora, Dra. Gómez, etc.)"
+                  placeholder="Tu nombre (ej: Ing. Carvajal V., Carlos Mora, etc.)"
                   className="w-full px-3 py-2 rounded-xl border border-[#c1c8c3] text-xs font-semibold text-[#002217] bg-white focus:outline-none focus:ring-2 focus:ring-[#006c49]"
                 />
                 <span className="text-[10px] text-[#717974]">
-                  Este nombre se mostrará en la bitácora pública y en tiempo real para todos los colaboradores.
+                  Si lo dejas en blanco, se registrará automáticamente como &quot;{currentObserverName || 'Ing. Carvajal V.'}&quot;.
                 </span>
               </div>
 
@@ -2157,14 +2210,13 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                 {/* Localidad input */}
                 <div>
                   <label className="block text-[11px] font-bold text-[#002217] uppercase mb-1">
-                    Localidad / Punto de Avistamiento *
+                    Localidad / Punto de Avistamiento
                   </label>
                   <input
                     type="text"
-                    required
                     value={sightingLocality}
                     onChange={(e) => setSightingLocality(e.target.value)}
-                    placeholder="Ej: Quebrada en Santa María de Dota, Los Santos"
+                    placeholder={`Ej: ${specimen.georeference.locality || 'Zona de los Santos'}`}
                     className="w-full px-3 py-2 rounded-xl border border-[#c1c8c3] text-xs font-semibold text-[#191c19] bg-white focus:outline-none focus:ring-2 focus:ring-[#006c49]"
                   />
                 </div>
@@ -2198,12 +2250,11 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="block text-[11px] font-bold text-[#002217] uppercase mb-1">
-                    Individuos (N) *
+                    Individuos (N)
                   </label>
                   <input
                     type="number"
                     min="1"
-                    required
                     value={sightingCount}
                     onChange={(e) => setSightingCount(Number(e.target.value) || 1)}
                     className="w-full px-3 py-2 rounded-xl border border-[#c1c8c3] text-xs font-mono font-bold text-[#191c19] focus:outline-none focus:ring-2 focus:ring-[#006c49]"
@@ -2228,7 +2279,7 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                 <div className="flex items-center justify-between">
                   <label className="text-[11px] font-bold text-[#002217] uppercase flex items-center gap-1">
                     <span className="material-symbols-outlined text-[16px] text-[#006c49]">landscape</span>
-                    ¿Dónde se vio el individuo? (Sustrato / Microhábitat) *
+                    ¿Dónde se vio el individuo? (Sustrato / Microhábitat)
                   </label>
                   <span className="text-[10px] text-[#717974] font-medium">Toca para marcar</span>
                 </div>
@@ -2264,10 +2315,9 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
 
                 <input
                   type="text"
-                  required
                   value={sightingMicrohabitat}
                   onChange={(e) => setSightingMicrohabitat(e.target.value)}
-                  placeholder="Ej: Sobre una roca húmeda a 20 cm del caudal, sobre ramas, etc."
+                  placeholder={`Ej: ${specimen.georeference.microhabitat || 'Follaje ripario sobre quebrada'}`}
                   className="w-full px-3 py-2 rounded-xl border border-[#c1c8c3] text-xs font-medium text-[#191c19] focus:outline-none focus:ring-2 focus:ring-[#006c49] bg-[#f8faf4]"
                 />
               </div>
@@ -2431,14 +2481,13 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
               {/* Comportamiento Observado */}
               <div>
                 <label className="block text-[11px] font-bold text-[#002217] uppercase mb-1">
-                  Comportamiento Observado *
+                  Comportamiento Observado
                 </label>
                 <textarea
-                  required
                   rows={2}
                   value={sightingBehavior}
                   onChange={(e) => setSightingBehavior(e.target.value)}
-                  placeholder="Ej: Vocalizando activamente para delimitación territorial..."
+                  placeholder="Ej: Vocalizando activamente para delimitación territorial (opcional)..."
                   className="w-full px-3 py-2 rounded-xl border border-[#c1c8c3] text-xs text-[#191c19] focus:outline-none focus:ring-2 focus:ring-[#006c49]"
                 />
               </div>
@@ -2625,10 +2674,10 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                 O pegar enlace URL de la imagen
               </label>
               <input
-                type="url"
+                type="text"
                 value={newPhotoUrl}
                 onChange={(e) => setNewPhotoUrl(e.target.value)}
-                placeholder="https://ejemplo.com/isthmohyla_nacientes.jpg"
+                placeholder="/isthmohyla_nacientes.jpg o https://..."
                 className="w-full px-3 py-2 text-xs bg-[#f8faf4] border border-[#c1c8c3] rounded-xl text-[#191c19] focus:outline-none focus:border-[#006c49]"
               />
             </div>
@@ -2748,7 +2797,7 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                 O pegar dirección URL de la fotografía
               </label>
               <input
-                type="url"
+                type="text"
                 value={editPhotoUrl}
                 onChange={(e) => setEditPhotoUrl(e.target.value)}
                 placeholder="/isthmohyla_nacientes_eye_zoom.jpg o https://..."

@@ -84,35 +84,8 @@ function addDeletedSightingIdsServer(newIds: string[]): void {
 
 function isDeletedServer(s: any, deletedSet: Set<string>): boolean {
   if (!s) return true;
-  if (s.id && deletedSet.has(String(s.id).trim())) return true;
-  const loc = s?.locality || '';
-  const dt = s?.date || s?.timestamp || '';
-  const cnt = s?.individualsCount ?? s?.count ?? '';
-  const key = `sight_${dt}_${loc}_${cnt}`;
-  if (deletedSet.has(key)) return true;
-
-  // Exact fingerprint matching for the ghost test sighting: N=12 ind., "Vocalizando los machos"
-  if (
-    Number(cnt) === 12 &&
-    (
-      String(loc).toLowerCase().includes('quebrada las nacientes') ||
-      String(s.notes || '').toLowerCase().includes('vocalizando los machos') ||
-      String(s.behaviorObserved || '').toLowerCase().includes('vocalizando los machos') ||
-      String(dt).includes('2026-11-07') ||
-      String(dt).includes('07 Nov 2026')
-    )
-  ) {
-    return true;
-  }
-
-  if (
-    String(s.notes || '').toLowerCase().includes('vocalizando los machos') ||
-    String(s.behaviorObserved || '').toLowerCase().includes('vocalizando los machos')
-  ) {
-    return true;
-  }
-
-  return false;
+  if (!s.id) return false;
+  return deletedSet.has(String(s.id).trim());
 }
 
 function sanitizeSpecimensSightings(specimens: any[]): any[] {
