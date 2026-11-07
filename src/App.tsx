@@ -29,6 +29,11 @@ import {
   getPendingQueueCount,
   isDeviceOnline,
 } from './services/offlineSyncQueue';
+import {
+  getDeletedSightingIds,
+  isSightingDeleted,
+  filterDeletedSightings,
+} from './utils/sightingTombstones';
 
 type ActiveView = 'COVER' | 'DETAIL' | 'MAP' | 'CATALOG' | 'STATISTICS';
 
@@ -70,48 +75,20 @@ function mergeSpecimenLists(existingList: SpecimenRecord[], incomingList: Specim
     } else {
       const existing = result[idx];
 
-      // Union of sightings by id: NEVER lose a sighting from either local or server!
-      const existingSightings = Array.isArray(existing.sightings) ? existing.sightings : [];
-      const incomingSightings = Array.isArray(incoming.sightings) ? incoming.sightings : [];
+      // Clean sightings excluding tombstones
+      const existingClean = filterDeletedSightings(existing.sightings || []);
+      const incomingClean = filterDeletedSightings(incoming.sightings || []);
 
-      const sightingMap = new Map<string, any>();
-      for (const s of existingSightings) {
-        if (s && s.id) sightingMap.set(s.id, s);
-      }
-      for (const s of incomingSightings) {
-        if (s && s.id) {
-          const old = sightingMap.get(s.id);
-          if (!old) {
-            sightingMap.set(s.id, s);
-          } else {
-            const incomingCurious = s.curiousFindingPhoto;
-            const oldCurious = old.curiousFindingPhoto;
-            const isMacho = s.id === 'sight-dota-20261009' || s.isCuriousFinding || s.curiousFindingTitle?.includes('Macho');
-            let finalCuriousPhoto = incomingCurious;
-            if (isMacho) {
-              if (incomingCurious && !incomingCurious.includes('isthmohyla_nacientes') && !incomingCurious.includes('eye_zoom')) {
-                finalCuriousPhoto = incomingCurious;
-              } else if (oldCurious && !oldCurious.includes('isthmohyla_nacientes') && !oldCurious.includes('eye_zoom')) {
-                finalCuriousPhoto = oldCurious;
-              } else {
-                finalCuriousPhoto = '/hallazgo_macho_un_ojo.jpg';
-              }
-            } else {
-              const incomingIsCustom = incomingCurious && (incomingCurious.startsWith('/uploads/') || incomingCurious.startsWith('data:') || incomingCurious.startsWith('blob:'));
-              const oldIsCustom = oldCurious && (oldCurious.startsWith('/uploads/') || oldCurious.startsWith('data:') || oldCurious.startsWith('blob:'));
-              finalCuriousPhoto = incomingIsCustom ? incomingCurious : (incomingCurious || (oldIsCustom ? oldCurious : incomingCurious));
-            }
-            sightingMap.set(s.id, {
-              ...old,
-              ...s,
-              curiousFindingPhoto: finalCuriousPhoto,
-              photoUrls: finalCuriousPhoto ? [finalCuriousPhoto] : (s.photoUrls || old.photoUrls),
-            });
-          }
-        }
+      // If incoming contains an explicit sightings array, use incoming sightings.
+      // Do NOT resurrect sightings deleted by user!
+      let mergedSightings: SightingEntry[];
+      if (Array.isArray(incoming.sightings)) {
+        mergedSightings = incomingClean;
+      } else {
+        mergedSightings = existingClean;
       }
 
-      const mergedSightings = Array.from(sightingMap.values()).sort((a, b) => {
+      mergedSightings.sort((a, b) => {
         const dateA = a.date || a.timestamp || '';
         const dateB = b.date || b.timestamp || '';
         return dateB.localeCompare(dateA);
@@ -215,7 +192,7 @@ function sanitizeSpecimens(list: SpecimenRecord[]): SpecimenRecord[] {
         ]);
 
         const userSightings = (item.sightings || []).filter(
-          (s) => !demoSightingIds.has(s.id) && !s.id.startsWith('sight-init-')
+          (s) => !demoSightingIds.has(s.id) && !s.id.startsWith('sight-init-') && !isSightingDeleted(s)
         );
 
         // Auto-sort chronologically by date descending (most recent visit first)
@@ -303,7 +280,8 @@ function sanitizeSpecimens(list: SpecimenRecord[]): SpecimenRecord[] {
         (s) =>
           !s.notes?.includes('Avistamiento y registro inicial de la especie en la bitácora.') &&
           s.id !== 's-init' &&
-          !s.id.startsWith('sight-init-')
+          !s.id.startsWith('sight-init-') &&
+          !isSightingDeleted(s)
       );
       realSightings.sort((a, b) => {
         const dateA = a.date || a.timestamp || '';
@@ -486,10 +464,11 @@ export default function App() {
 
     // 2. Also save to server file backup so both cloud and container stay in sync
     try {
+      const deletedIds = Array.from(getDeletedSightingIds());
       fetch('/api/database/specimens', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ specimens: sanitized, lastModified: now, deviceId }),
+        body: JSON.stringify({ specimens: sanitized, lastModified: now, deviceId, deletedSightingIds: deletedIds }),
       }).catch(() => {});
     } catch {}
 
@@ -557,10 +536,10 @@ export default function App() {
             localStorage.setItem(TIMESTAMP_KEY, String(Date.now()));
           } catch {}
 
-          // If local had unsynced sightings or species not yet in cloud, push merged back to cloud!
-          const localSightingsCount = prevLocal.reduce((acc, s) => acc + (s.sightings?.length || 0), 0);
+          // If cloud had any sightings that are now deleted, sync the sanitized list back so cloud also deletes them!
           const cloudSightingsCount = cloudSpecimens.reduce((acc, s) => acc + (s.sightings?.length || 0), 0);
-          if (localSightingsCount > cloudSightingsCount || prevLocal.length > cloudSpecimens.length) {
+          const sanitizedSightingsCount = sanitized.reduce((acc, s) => acc + (s.sightings?.length || 0), 0);
+          if (cloudSightingsCount > sanitizedSightingsCount || prevLocal.length > cloudSpecimens.length) {
             batchSyncSpecimensToCloud(sanitized).catch(() => {});
           }
 

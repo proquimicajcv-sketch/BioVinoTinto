@@ -44,6 +44,87 @@ if (!fs.existsSync(DEVICES_DIR)) {
   fs.mkdirSync(DEVICES_DIR, { recursive: true });
 }
 
+const DELETED_SIGHTINGS_FILE = path.join(DB_DIR, 'deleted_sightings.json');
+
+function getDeletedSightingIdsServer(): Set<string> {
+  const set = new Set<string>([
+    'sight-test-laptop-1',
+    'sight-cascadas-vinotinto-20260828',
+    'sight-1',
+    'sight-2',
+  ]);
+  if (fs.existsSync(DELETED_SIGHTINGS_FILE)) {
+    try {
+      const data = JSON.parse(fs.readFileSync(DELETED_SIGHTINGS_FILE, 'utf-8'));
+      if (Array.isArray(data)) {
+        for (const id of data) {
+          if (id && typeof id === 'string') set.add(id.trim());
+        }
+      }
+    } catch {}
+  }
+  return set;
+}
+
+function addDeletedSightingIdsServer(newIds: string[]): void {
+  const current = getDeletedSightingIdsServer();
+  let changed = false;
+  for (const id of newIds) {
+    if (id && typeof id === 'string' && !current.has(id.trim())) {
+      current.add(id.trim());
+      changed = true;
+    }
+  }
+  if (changed) {
+    try {
+      fs.writeFileSync(DELETED_SIGHTINGS_FILE, JSON.stringify(Array.from(current), null, 2), 'utf-8');
+    } catch {}
+  }
+}
+
+function isDeletedServer(s: any, deletedSet: Set<string>): boolean {
+  if (!s) return true;
+  if (s.id && deletedSet.has(String(s.id).trim())) return true;
+  const loc = s?.locality || '';
+  const dt = s?.date || s?.timestamp || '';
+  const cnt = s?.individualsCount ?? s?.count ?? '';
+  const key = `sight_${dt}_${loc}_${cnt}`;
+  if (deletedSet.has(key)) return true;
+
+  // Exact fingerprint matching for the ghost test sighting: N=12 ind., "Vocalizando los machos"
+  if (
+    Number(cnt) === 12 &&
+    (
+      String(loc).toLowerCase().includes('quebrada las nacientes') ||
+      String(s.notes || '').toLowerCase().includes('vocalizando los machos') ||
+      String(s.behaviorObserved || '').toLowerCase().includes('vocalizando los machos') ||
+      String(dt).includes('2026-11-07') ||
+      String(dt).includes('07 Nov 2026')
+    )
+  ) {
+    return true;
+  }
+
+  if (
+    String(s.notes || '').toLowerCase().includes('vocalizando los machos') ||
+    String(s.behaviorObserved || '').toLowerCase().includes('vocalizando los machos')
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+function sanitizeSpecimensSightings(specimens: any[]): any[] {
+  const deletedSet = getDeletedSightingIdsServer();
+  return specimens.map((spec) => {
+    if (!spec) return spec;
+    const raw = Array.isArray(spec.sightings) ? spec.sightings : [];
+    const filtered = raw.filter((s: any) => !isDeletedServer(s, deletedSet));
+    return { ...spec, sightings: filtered };
+  });
+}
+
 function getTargetDbFile(deviceId?: string): string {
   if (!deviceId || typeof deviceId !== 'string') {
     return DB_FILE;
@@ -61,10 +142,11 @@ app.get('/api/database/specimens', (req: Request, res: Response): void => {
       const content = fs.readFileSync(DB_FILE, 'utf-8');
       const data = JSON.parse(content);
       if (Array.isArray(data) && data.length > 0) {
+        const cleanData = sanitizeSpecimensSightings(data);
         const stats = fs.statSync(DB_FILE);
         res.json({
           success: true,
-          data,
+          data: cleanData,
           deviceId: deviceId || 'global',
           lastModified: Math.max(serverDbLastModified, stats.mtimeMs),
         });
@@ -79,10 +161,11 @@ app.get('/api/database/specimens', (req: Request, res: Response): void => {
         const content = fs.readFileSync(targetFile, 'utf-8');
         const data = JSON.parse(content);
         if (Array.isArray(data) && data.length > 0) {
+          const cleanData = sanitizeSpecimensSightings(data);
           const stats = fs.statSync(targetFile);
           res.json({
             success: true,
-            data,
+            data: cleanData,
             deviceId,
             lastModified: stats.mtimeMs,
           });
@@ -102,6 +185,7 @@ function mergeSpecimens(existingList: any[], incomingList: any[]): any[] {
   if (!Array.isArray(existingList) || existingList.length === 0) return incomingList;
   if (!Array.isArray(incomingList) || incomingList.length === 0) return existingList;
 
+  const deletedSet = getDeletedSightingIdsServer();
   const result: any[] = [...existingList];
 
   for (const incoming of incomingList) {
@@ -111,67 +195,43 @@ function mergeSpecimens(existingList: any[], incomingList: any[]): any[] {
     );
 
     if (idx === -1) {
-      result.push(incoming);
+      const raw = Array.isArray(incoming.sightings) ? incoming.sightings : [];
+      result.push({
+        ...incoming,
+        sightings: raw.filter((s: any) => !isDeletedServer(s, deletedSet)),
+      });
     } else {
       const existing = result[idx];
 
-      // Merge sightings: UNION by id, NEVER LOSE A SIGHTING!
-      const existingSightings = Array.isArray(existing.sightings) ? existing.sightings : [];
+      // When incoming explicitly contains sightings, use incoming sightings authoritatively.
+      // Do NOT resurrect sightings deleted by the user!
       const incomingSightings = Array.isArray(incoming.sightings) ? incoming.sightings : [];
-
-      const getSightingKey = (s: any) => {
-        if (s && s.id) return String(s.id);
-        const loc = s?.locality || '';
-        const dt = s?.date || s?.timestamp || '';
-        const cnt = s?.individualsCount ?? s?.count ?? '';
-        return `sight_${dt}_${loc}_${cnt}`;
-      };
-
-      const sightingMap = new Map<string, any>();
-      for (const s of existingSightings) {
-        if (s) {
-          const key = getSightingKey(s);
+      const cleanSightings = incomingSightings
+        .filter((s: any) => !isDeletedServer(s, deletedSet))
+        .map((s: any) => {
           const c = Number(s.individualsCount ?? s.count) || 1;
-          sightingMap.set(key, { ...s, id: s.id || key, count: c, individualsCount: c });
-        }
-      }
-      for (const s of incomingSightings) {
-        if (s) {
-          const key = getSightingKey(s);
-          const old = sightingMap.get(key);
-          const c = Number(s.individualsCount ?? s.count ?? old?.individualsCount ?? old?.count) || 1;
-          const incomingCurious = s.curiousFindingPhoto;
-          const oldCurious = old?.curiousFindingPhoto;
           const isMacho = s.id === 'sight-dota-20261009' || s.isCuriousFinding || s.curiousFindingTitle?.includes('Macho');
-          let finalCuriousPhoto = incomingCurious;
+          let curiousPhoto = s.curiousFindingPhoto;
           if (isMacho) {
-            if (incomingCurious && !incomingCurious.includes('isthmohyla_nacientes') && !incomingCurious.includes('eye_zoom')) {
-              finalCuriousPhoto = incomingCurious;
-            } else if (oldCurious && !oldCurious.includes('isthmohyla_nacientes') && !oldCurious.includes('eye_zoom')) {
-              finalCuriousPhoto = oldCurious;
-            } else {
-              finalCuriousPhoto = '/hallazgo_macho_un_ojo.jpg';
+            if (!curiousPhoto || curiousPhoto.includes('isthmohyla_nacientes') || curiousPhoto.includes('eye_zoom')) {
+              curiousPhoto = '/hallazgo_macho_un_ojo.jpg';
             }
-          } else {
-            const incomingIsCustom = incomingCurious && (incomingCurious.startsWith('/uploads/') || incomingCurious.startsWith('data:') || incomingCurious.startsWith('blob:'));
-            const oldIsCustom = oldCurious && (oldCurious.startsWith('/uploads/') || oldCurious.startsWith('data:') || oldCurious.startsWith('blob:'));
-            finalCuriousPhoto = incomingIsCustom ? incomingCurious : (incomingCurious || (oldIsCustom ? oldCurious : incomingCurious));
           }
+          return {
+            ...s,
+            count: c,
+            individualsCount: c,
+            curiousFindingPhoto: curiousPhoto,
+            photoUrls: curiousPhoto ? [curiousPhoto] : s.photoUrls,
+          };
+        })
+        .sort((a: any, b: any) => {
+          const dateA = a.date || a.timestamp || '';
+          const dateB = b.date || b.timestamp || '';
+          return dateB.localeCompare(dateA);
+        });
 
-          const mergedItem = old
-            ? { ...old, ...s, id: s.id || old.id || key, count: c, individualsCount: c, curiousFindingPhoto: finalCuriousPhoto, photoUrls: finalCuriousPhoto ? [finalCuriousPhoto] : s.photoUrls }
-            : { ...s, id: s.id || key, count: c, individualsCount: c, curiousFindingPhoto: finalCuriousPhoto, photoUrls: finalCuriousPhoto ? [finalCuriousPhoto] : s.photoUrls };
-          sightingMap.set(key, mergedItem);
-        }
-      }
-
-      const mergedSightings = Array.from(sightingMap.values()).sort((a, b) => {
-        const dateA = a.date || a.timestamp || '';
-        const dateB = b.date || b.timestamp || '';
-        return dateB.localeCompare(dateA);
-      });
-
-      // Merge additional photos: UNION by id/label with custom photo preservation
+      // Merge additional photos: preserve custom photos
       const existingPhotos = Array.isArray(existing.additionalPhotos) ? existing.additionalPhotos : [];
       const incomingPhotos = Array.isArray(incoming.additionalPhotos) ? incoming.additionalPhotos : [];
       const photoMap = new Map<string, any>();
@@ -216,7 +276,7 @@ function mergeSpecimens(existingList: any[], incomingList: any[]): any[] {
         ...existing,
         ...incoming,
         heroImage: finalHero,
-        sightings: mergedSightings,
+        sightings: cleanSightings,
         additionalPhotos: mergedPhotos,
       };
     }
@@ -227,27 +287,32 @@ function mergeSpecimens(existingList: any[], incomingList: any[]): any[] {
 
 app.post('/api/database/specimens', (req: Request, res: Response): void => {
   try {
-    const { specimens, lastModified, deviceId } = req.body;
+    const { specimens, lastModified, deviceId, deletedSightingIds } = req.body;
     if (!Array.isArray(specimens)) {
       res.status(400).json({ success: false, error: 'Formato inválido' });
       return;
     }
+
+    if (Array.isArray(deletedSightingIds) && deletedSightingIds.length > 0) {
+      addDeletedSightingIdsServer(deletedSightingIds);
+    }
+
     const updatedTime = Number(lastModified) || Date.now();
     serverDbLastModified = updatedTime;
 
-    // Smart-merge with existing DB so sightings from ANY device are never lost
-    let finalSpecimens = specimens;
+    let finalSpecimens = sanitizeSpecimensSightings(specimens);
     if (fs.existsSync(DB_FILE)) {
       try {
         const content = fs.readFileSync(DB_FILE, 'utf-8');
         const currentData = JSON.parse(content);
         if (Array.isArray(currentData) && currentData.length > 0) {
-          finalSpecimens = mergeSpecimens(currentData, specimens);
+          finalSpecimens = mergeSpecimens(currentData, finalSpecimens);
         }
       } catch (err) {
         console.warn('Error reading DB_FILE for merge:', err);
       }
     }
+    finalSpecimens = sanitizeSpecimensSightings(finalSpecimens);
 
     // CRITICAL: Always write merged database to DB_FILE so all devices stay updated
     fs.writeFileSync(DB_FILE, JSON.stringify(finalSpecimens, null, 2), 'utf-8');

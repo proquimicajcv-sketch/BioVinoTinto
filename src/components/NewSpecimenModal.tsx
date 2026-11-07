@@ -12,6 +12,7 @@ import {
 } from '../data/costaRicaData';
 import { saveImageOfflineAndServer, getTaxonFallbackImage } from '../utils/offlineImageCache';
 import { captureDeviceGps } from '../utils/deviceGps';
+import { registerDeletedSighting } from '../utils/sightingTombstones';
 
 interface NewSpecimenModalProps {
   isOpen: boolean;
@@ -684,7 +685,7 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
       },
 
       additionalPhotos: additionalPhotosList,
-      sightings: editingSpecimen ? (editingSpecimen.sightings || sightingsList || []) : [],
+      sightings: editingSpecimen ? (sightingsList || []) : [],
     };
 
     try {
@@ -1942,6 +1943,7 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
                 setSightingPinError(null);
 
                 if (isDel) {
+                  registerDeletedSighting(targetSight);
                   setSightingsList((prev) => prev.filter((s) => s.id !== targetSight.id));
                 } else {
                   setEditingSightingId(targetSight.id);

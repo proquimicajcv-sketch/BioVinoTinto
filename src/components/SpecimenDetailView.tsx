@@ -29,6 +29,7 @@ import {
 import { formatProtectedCoordinates } from '../utils/geoprivacy';
 import { fetchLiveFieldWeather } from '../utils/weatherMoonService';
 import { captureDeviceGps } from '../utils/deviceGps';
+import { registerDeletedSighting } from '../utils/sightingTombstones';
 
 // Helper utilities for sighting date and time handling
 function parseDateToYmd(dateStr?: string, timestampStr?: string): string {
@@ -557,6 +558,7 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
     setPinErrorMsg(null);
 
     if (action === 'delete') {
+      registerDeletedSighting(sighting);
       const updatedSightings = (specimen.sightings || []).filter((s) => s.id !== sighting.id);
       const updatedSpecimen: SpecimenRecord = {
         ...specimen,
@@ -565,7 +567,7 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
       if (onSaveSpecimen) {
         onSaveSpecimen(updatedSpecimen);
       }
-      setSaveSuccessMsg('Avistamiento eliminado exitosamente.');
+      setSaveSuccessMsg('Avistamiento eliminado permanentemente.');
       setTimeout(() => setSaveSuccessMsg(null), 3000);
     } else if (action === 'edit') {
       handleOpenEditSighting(sighting);
