@@ -704,9 +704,23 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 items-center">
-              <div className="relative w-full sm:w-48 h-36 rounded-xl bg-[#0f382a] overflow-hidden border border-[#c1c8c3] flex-shrink-0 shadow-inner group">
+              <div className="relative w-full sm:w-48 h-36 rounded-xl bg-[#031d14] overflow-hidden border border-[#c1c8c3] flex-shrink-0 shadow-inner group flex items-center justify-center">
                 {heroImage ? (
-                  <img src={heroImage} alt="Espécimen preview" className="w-full h-full object-cover" />
+                  <>
+                    <img
+                      src={heroImage}
+                      alt=""
+                      aria-hidden="true"
+                      referrerPolicy="no-referrer"
+                      className="absolute inset-0 w-full h-full object-cover blur-sm opacity-35 scale-110 pointer-events-none"
+                    />
+                    <img
+                      src={heroImage}
+                      alt="Espécimen preview"
+                      referrerPolicy="no-referrer"
+                      className="relative z-10 max-w-full max-h-full object-contain p-1.5 drop-shadow-md select-none"
+                    />
+                  </>
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center text-[#79a28f] gap-1 p-2 text-center text-xs">
                     <span className="material-symbols-outlined text-3xl">image</span>

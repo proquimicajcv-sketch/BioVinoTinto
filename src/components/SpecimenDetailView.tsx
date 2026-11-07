@@ -710,9 +710,19 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
 
       {/* Main Content Container */}
       <div className="max-w-3xl mx-auto w-full">
-        {/* Interactive Hero Image */}
-        <section className="relative w-full overflow-hidden bg-[#0f382a] shadow-md">
-          <div className="relative w-full h-80 sm:h-96 overflow-hidden">
+        {/* Interactive Hero Image - Organismo completo sin recortes */}
+        <section className="relative w-full overflow-hidden bg-[#02150e] shadow-md">
+          <div className="relative w-full h-80 sm:h-96 md:h-[420px] overflow-hidden flex items-center justify-center">
+            {/* Fondo ambiental desenfocado con los tonos reales de la foto */}
+            <img
+              src={specimen.heroImage || getTaxonFallbackImage(specimen.taxonGroup, specimen.scientificName)}
+              alt=""
+              aria-hidden="true"
+              referrerPolicy="no-referrer"
+              className="absolute inset-0 w-full h-full object-cover blur-xl opacity-35 scale-125 pointer-events-none select-none"
+            />
+
+            {/* Imagen principal completa preservando proporciones originales (100% visible) */}
             <img
               src={specimen.heroImage || getTaxonFallbackImage(specimen.taxonGroup, specimen.scientificName)}
               alt={specimen.heroImageDescription}
@@ -723,17 +733,17 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                   getTaxonFallbackImage(specimen.taxonGroup, specimen.scientificName)
                 );
               }}
-              className={`w-full h-full object-cover transition-transform duration-500 ease-out select-none cursor-pointer ${
+              className={`relative z-10 max-w-full max-h-full object-contain p-2 sm:p-4 transition-transform duration-500 ease-out select-none cursor-pointer drop-shadow-2xl ${
                 isZoomed ? 'scale-150' : 'scale-100 hover:scale-105'
               }`}
               onClick={() => setIsZoomed(!isZoomed)}
             />
             {/* Ambient Gradient Scrims */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#002217]/90 via-[#002217]/20 to-transparent pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-b from-[#002217]/60 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#002217]/90 via-transparent to-transparent pointer-events-none z-10" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#002217]/60 via-transparent to-transparent pointer-events-none z-10" />
 
             {/* Live Inspection Badges Overlay */}
-            <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
+            <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none z-20">
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-md shadow-sm pointer-events-auto">
                 <span className="w-2 h-2 rounded-full bg-[#6cf8bb] animate-pulse" />
                 <span className="font-mono text-[11px] font-bold text-[#002217] uppercase tracking-wider">
@@ -1210,7 +1220,7 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                 {specimen.additionalPhotos.map((photo) => (
                   <div
                     key={photo.id}
-                    className="relative rounded-lg overflow-hidden h-28 group bg-[#e7e9e3] border border-[#c1c8c3]/40 hover:border-[#006c49] transition-all"
+                    className="relative rounded-lg overflow-hidden h-28 group bg-[#00170f] border border-[#c1c8c3]/40 hover:border-[#006c49] transition-all flex items-center justify-center"
                   >
                     <div
                       onClick={() =>
@@ -1221,12 +1231,20 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                           desc: photo.description,
                         })
                       }
-                      className="w-full h-full cursor-pointer"
+                      className="w-full h-full cursor-pointer relative flex items-center justify-center overflow-hidden"
                     >
+                      {/* Ambient blur backdrop */}
+                      <img
+                        src={photo.url}
+                        alt=""
+                        aria-hidden="true"
+                        referrerPolicy="no-referrer"
+                        className="absolute inset-0 w-full h-full object-cover blur-sm opacity-35 scale-110 pointer-events-none"
+                      />
                       <img
                         src={photo.url}
                         alt={photo.label}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="relative z-10 max-w-full max-h-full object-contain p-1 group-hover:scale-105 transition-transform duration-300 drop-shadow-md select-none"
                         referrerPolicy="no-referrer"
                         onError={(e) => {
                           const isMacho = photo.id === 'photo-4' || (photo.label && photo.label.toLowerCase().includes('macho tuerto'));
@@ -1238,7 +1256,7 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                           );
                         }}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none z-10" />
                     </div>
 
                     {/* Input de archivo nativo directo */}

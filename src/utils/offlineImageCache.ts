@@ -222,14 +222,25 @@ export async function saveImageOfflineAndServer(
 export function getTaxonFallbackImage(taxonGroup?: string, scientificName?: string): string {
   const sci = (scientificName || '').toLowerCase();
   const grp = (taxonGroup || '').toLowerCase();
-  if (sci.includes('isthmohyla') || grp === 'amphibia') {
+
+  // ONLY Isthmohyla nacientes gets the Isthmohyla photo. NEVER other frogs, reptiles or taxa.
+  if (sci.includes('isthmohyla') || sci.includes('nacientes')) {
     return '/isthmohyla_nacientes.jpg';
+  }
+  if (sci.includes('espadarana') || sci.includes('prosoblepon')) {
+    return '/uploads/espadarana_prosoblepon.jpg';
   }
   if (sci.includes('lateralis') || sci.includes('lora')) {
     return '/uploads/bothriechis_lateralis.jpg';
   }
   if (sci.includes('cerrophid') || sci.includes('sasai')) {
     return '/uploads/cerrophidium_sasai.jpg';
+  }
+  if (sci.includes('podiciferus') || sci.includes('craugastor')) {
+    return '/uploads/craugastor_podiciferus.jpg';
+  }
+  if (sci.includes('nigrescens') || sci.includes('bolitoglossa')) {
+    return '/uploads/bolitoglossa_nigrescens.jpg';
   }
   if (grp.includes('reptil')) {
     return '/uploads/bothriechis_lateralis.jpg';

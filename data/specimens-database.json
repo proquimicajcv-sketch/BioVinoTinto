@@ -319,12 +319,12 @@
       "code": "LC",
       "label": "Preocupación Menor"
     },
-    "heroImage": "https://www.aquaportail.com/aquabdd/photos/espadarana-prosoblepon.webp",
+    "heroImage": "/uploads/espadarana_prosoblepon.jpg",
     "darwinCoreSync": true,
     "taxonomy": {
       "order": "Anura",
-      "genus": "",
-      "family": "",
+      "genus": "Espadarana",
+      "family": "Centrolenidae",
       "phylum": "Chordata",
       "species": "prosoblepon",
       "class": "Amphibia",
@@ -335,9 +335,9 @@
     "additionalPhotos": [
       {
         "id": "photo-1793906191799",
-        "description": "Fotografía de campo agregada por URL.",
-        "label": "Puesta",
-        "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSSm9k2NdhGdDkugkqhp0J55U6x7T_NJfdm46ciQCmuu8fBZlkx7Mh9GLE4&s=10"
+        "description": "Masa de huevos de Espadarana prosoblepon adherida a vegetación riparia sobre corriente de agua.",
+        "label": "Puesta de huevos",
+        "url": "/uploads/espadarana_prosoblepon_puesta.jpg"
       }
     ],
     "sightings": [],

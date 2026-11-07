@@ -338,8 +338,17 @@ export const SpecimenCatalogView: React.FC<SpecimenCatalogViewProps> = ({
                 onClick={() => onSelectSpecimen(specimen)}
                 className="bg-white rounded-2xl border border-[#c1c8c3]/70 overflow-hidden shadow-sm hover:shadow-md hover:border-[#006c49]/50 transition-all cursor-pointer flex flex-col group"
               >
-                {/* Card Photo Header */}
-                <div className="relative w-full h-44 bg-[#0f382a] overflow-hidden">
+                {/* Card Photo Header - Imagen completa sin recortar */}
+                <div className="relative w-full h-48 bg-[#041c14] overflow-hidden flex items-center justify-center">
+                  {/* Fondo ambiental sutil desenfocado para llenar el marco con la misma paleta */}
+                  <img
+                    src={specimen.heroImage || getTaxonFallbackImage(specimen.taxonGroup, specimen.scientificName)}
+                    alt=""
+                    aria-hidden="true"
+                    referrerPolicy="no-referrer"
+                    className="absolute inset-0 w-full h-full object-cover blur-md opacity-35 scale-110 pointer-events-none select-none"
+                  />
+                  {/* Fotografía principal completa (organismo 100% visible sin cortes) */}
                   <img
                     src={specimen.heroImage || getTaxonFallbackImage(specimen.taxonGroup, specimen.scientificName)}
                     alt={specimen.scientificName}
@@ -350,9 +359,9 @@ export const SpecimenCatalogView: React.FC<SpecimenCatalogViewProps> = ({
                         getTaxonFallbackImage(specimen.taxonGroup, specimen.scientificName)
                       );
                     }}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="relative z-10 max-w-full max-h-full object-contain p-1.5 group-hover:scale-105 transition-transform duration-300 drop-shadow-md select-none"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent pointer-events-none z-10" />
 
                   {/* Catalog Pill */}
                   <span className="absolute top-2.5 left-2.5 bg-white/95 backdrop-blur-md text-[#002217] font-mono text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">

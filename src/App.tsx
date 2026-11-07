@@ -350,7 +350,20 @@ function sanitizeSpecimens(list: SpecimenRecord[]): SpecimenRecord[] {
         if (!finalHero || finalHero.includes('isthmohyla') || finalHero.includes('gstatic')) {
           finalHero = '/uploads/cerrophidium_sasai.jpg';
         }
-      } else if (item.taxonGroup !== 'Amphibia' && finalHero && finalHero.includes('isthmohyla')) {
+      } else if (item.scientificName?.includes('Espadarana') || item.scientificName?.includes('prosoblepon')) {
+        if (!finalHero || finalHero.includes('isthmohyla') || finalHero.includes('aquaportail')) {
+          finalHero = '/uploads/espadarana_prosoblepon.jpg';
+        }
+      } else if (item.scientificName?.includes('Craugastor') || item.scientificName?.includes('podiciferus')) {
+        if (!finalHero || finalHero.includes('isthmohyla')) {
+          finalHero = '/uploads/craugastor_podiciferus.jpg';
+        }
+      } else if (item.scientificName?.includes('Bolitoglossa') || item.scientificName?.includes('nigrescens')) {
+        if (!finalHero || finalHero.includes('isthmohyla')) {
+          finalHero = '/uploads/bolitoglossa_nigrescens.jpg';
+        }
+      } else if (item.scientificName !== 'Isthmohyla nacientes' && finalHero && finalHero.includes('isthmohyla_nacientes')) {
+        // Never allow any other species to borrow Isthmohyla nacientes photo
         finalHero = getTaxonFallbackImage(item.taxonGroup, item.scientificName);
       }
 
