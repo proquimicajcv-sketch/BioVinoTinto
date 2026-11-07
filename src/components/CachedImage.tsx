@@ -50,6 +50,7 @@ export const CachedImage: React.FC<CachedImageProps> = ({
     <img
       src={resolvedSrc}
       alt={alt}
+      referrerPolicy="no-referrer"
       onError={() => {
         // Try fallback to original src if resolved was different
         if (resolvedSrc !== src) {

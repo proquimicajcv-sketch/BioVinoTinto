@@ -18,7 +18,7 @@ import { AudioRecordingModal } from './AudioRecordingModal';
 import { CostaRicaMap } from './CostaRicaMap';
 import { CachedImage } from './CachedImage';
 import { ThemeSwitcher } from './ThemeSwitcher';
-import { saveImageOfflineAndServer, handleImageOfflineFallback } from '../utils/offlineImageCache';
+import { saveImageOfflineAndServer, handleImageOfflineFallback, getTaxonFallbackImage } from '../utils/offlineImageCache';
 import {
   formatCoordinatesDMS,
   findNearestHotspot,
@@ -714,10 +714,14 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
         <section className="relative w-full overflow-hidden bg-[#0f382a] shadow-md">
           <div className="relative w-full h-80 sm:h-96 overflow-hidden">
             <img
-              src={specimen.heroImage || '/isthmohyla_nacientes.jpg'}
+              src={specimen.heroImage || getTaxonFallbackImage(specimen.taxonGroup, specimen.scientificName)}
               alt={specimen.heroImageDescription}
+              referrerPolicy="no-referrer"
               onError={(e) => {
-                handleImageOfflineFallback(e.currentTarget as HTMLImageElement, '/isthmohyla_nacientes.jpg');
+                handleImageOfflineFallback(
+                  e.currentTarget as HTMLImageElement,
+                  getTaxonFallbackImage(specimen.taxonGroup, specimen.scientificName)
+                );
               }}
               className={`w-full h-full object-cover transition-transform duration-500 ease-out select-none cursor-pointer ${
                 isZoomed ? 'scale-150' : 'scale-100 hover:scale-105'
@@ -1223,9 +1227,15 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                         src={photo.url}
                         alt={photo.label}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        referrerPolicy="no-referrer"
                         onError={(e) => {
                           const isMacho = photo.id === 'photo-4' || (photo.label && photo.label.toLowerCase().includes('macho tuerto'));
-                          handleImageOfflineFallback(e.currentTarget as HTMLImageElement, isMacho ? '/hallazgo_macho_un_ojo.jpg' : '/isthmohyla_nacientes.jpg');
+                          handleImageOfflineFallback(
+                            e.currentTarget as HTMLImageElement,
+                            isMacho
+                              ? '/hallazgo_macho_un_ojo.jpg'
+                              : getTaxonFallbackImage(specimen.taxonGroup, specimen.scientificName)
+                          );
                         }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />

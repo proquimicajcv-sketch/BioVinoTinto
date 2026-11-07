@@ -1,39 +1,179 @@
 [
   {
-    "id": "cr-bio-2026-0042",
-    "catalogNumber": "CAT. CR-BIO-2026-0042",
-    "scientificName": "Isthmohyla nacientes",
-    "commonName": "Rana de las Nacientes / Rana Cafetera / Nacientes Treefrog",
-    "taxonGroup": "Amphibia",
-    "realm": "Neotropical",
-    "collector": "Ing. Carvajal V. & Colaboradores (Herpetología Santos)",
-    "collectionDate": "15 Febrero 2026",
-    "collectionTime": "20:30 CST",
-    "institutionCode": "UCR-MZ / UNA",
-    "curationStatus": "Verificada",
-    "darwinCoreSync": true,
-    "fieldFolio": "Ficha Holotipo / Paratipo Folio #01-Santos",
+    "taxonomy": {
+      "family": "",
+      "phylum": "Chordata",
+      "kingdom": "Animalia",
+      "taxonId": "8408",
+      "class": "Amphibia",
+      "genus": "",
+      "species": "podiciferus",
+      "order": "Anura"
+    },
     "iucnStatus": {
-      "code": "VU",
-      "label": "Vulnerable (Endémica de Costa Rica)",
-      "trend": "Microendémica / Sensible a Fuentes Hídricas"
+      "label": "Preocupación Menor",
+      "trend": "Población Estable",
+      "code": "LC"
+    },
+    "darwinCoreSync": true,
+    "heroImage": "/uploads/craugastor_podiciferus.jpg",
+    "collectionTime": "13:25 CST",
+    "heroImageDescription": "Espécimen de campo de Craugastor podiciferus registrado en Zona de los Santos (San Marcos, Tarrazú / Dota).",
+    "curationStatus": "Verificada",
+    "bioacoustics": null,
+    "institutionCode": "UCR-MZ",
+    "commonName": "Ranita de hojarasca de altura)",
+    "realm": "Neotropical",
+    "morphometrics": {
+      "interspecificRelations": "Comportamiento defensivo: Camuflaje disruptivo extremo gracias a su polimorfismo, asemejándose a hojas muertas en diferente grado de descomposición. Al ser descubierta, recurre a una secuencia de saltos rápidos y erráticos para luego congelarse súbitamente (tanatosis temporal).\n\nSimpatría: Comparte el piso del bosque nuboso con otros congéneres de altura (como Craugastor bransfordii en límites inferiores o Craugastor underwoodi), salamandras plethodóntidas (Bolitoglossa pesrubra) y reptiles como Cerrophidion sasai y Mesaspis monticola.\n\nDepredadores: Depredada activamente por víboras de altura (Cerrophidion sasai), serpientes colúbridas de hojarasca (Geophis, Ninia), aves de sotobosque montano (pichilines, tordos) y artrópodos cazadores (arañas errantes).",
+      "courtshipAndMating": "Modo reproductivo: Desarrollo directo terrestre (ovíparo sin fase de renacuajo libre en cuerpos de agua).\n\nPuesta: La hembra deposita paquetes pequeños de huevos (usualmente entre 15 y 30) en microhábitats terrestres oscuros y saturados de humedad (bajo troncos podridos, raíces o en depresiones protegidas entre el mantillo de hojas).\n\nEclosión y cuidado: Del huevo eclosionan directamente ranitas completamente formadas en miniatura. No presentan un cuidado parental prolongado tras la oviposición y fecundación.",
+      "colorationAndAnatomy": "Morfología: Anuro pequeño y esbelto. Machos adultos entre 19 y 26 mm; hembras más grandes, entre 27 y 40 mm. Piel del dorso con textura granular fina o pequeños tubérculos dispersos. Discos de los dedos reducidos o apenas expandidos (especie no trepadora); carece de membranas interdigitales en las patas traseras.\n\nColoración: Presenta uno de los polimorfismos cromáticos más extremos entre los anfibios de Costa Rica. El fondo dorsal varía desde marrón cenizo, café rojizo, grisáceo, ocre hasta casi negro. Puede mostrar patrones lisos, manchas oscuras difusas, marcas en \"chevrón\" (V invertida), una línea media vertebral crema/naranja brillante, o amplias bandas dorsolaterales pálidas. El vientre es amarillento pálido o crema grisáceo con moteado tenue. Ojos con iris cobrizo a dorado en la mitad superior.",
+      "snoutVentLengthMm": 58,
+      "ethologyAndReproduction": "Patrón de actividad: Principalmente diurna y crepuscular. Es activa durante el día desplazándose por saltos cortos y rápidos sobre la superficie de la hojarasca.\n\nTermorregulación: Ectotermia pasiva adaptada a ambientes fríos de montaña; tolera rangos térmicos bajos manteniéndose en microclimas húmedos bajo el dosel.\n\nEstratificación y forrajeo: Estrictamente terrestre y criptozóica. Pasa su ciclo de vida entero en el piso del bosque nuboso, refugiándose entre capas densas de hojarasca de roble (Quercus), musgos húmedos y debajo de troncos en descomposición. Se alimenta de microartrópodos del suelo (colémbolos, ácaros, diminutos coleópteros y hormigas).\n\nBioacústica: El canto del macho es sumamente tenue, discreto y difícil de ubicar: una serie corta de chasquidos o pulsos finos emitidos desde el nivel del suelo, a menudo entremezclados con el crujido del follaje.",
+      "sympatricSpecies": [],
+      "confirmedScientificData": "Distribución y altitud en CR: Especie endémica de las tierras altas de Costa Rica y el oeste de Panamá. Se distribuye ampliamente a lo largo de la Cordillera Central y la Cordillera de Talamanca, en un rango altitudinal típico de 1.100 a más de 3.000 m.s.n.m. (muy abundante en el Macizo de la Muerte, Tapantí, Volcán Barva y Monteverde).\n\nImpacto y resiliencia ante el quítrido (Bd): Documentada en numerosos estudios de la UCR y monitoreos de SINAC tras las caídas poblacionales de anfibios en las décadas de 1980 y 1990. Aunque sufrió declives locales por Batrachochytrium dendrobatidis, ha demostrado una notable capacidad de recuperación y persistencia demográfica en comparación con otros anfibios de altura.\n\nModelo en genética y polimorfismo: Ampliamente citada en literatura evolutiva centroamericana como caso clásico de selección equilibrada y mantenimiento de múltiples morfos de color dentro de una misma población local simpátrica."
+    },
+    "georeference": {
+      "latitudeDMS": "9°36'23.6\" N",
+      "datum": "WGS84",
+      "accuracyMeters": 3.2,
+      "microhabitat": "Vegetación riparia y ramas caídas",
+      "longitudeDMS": "83°58'48.8\" W",
+      "conservationArea": "Área de Conservación Pacífico Central (ACOPAC)",
+      "lifeZone": "Bosque Muy Húmedo Montano Bajo (bmh-MB)",
+      "longitude": -83.98021108439885,
+      "latitude": 9.606557515412854,
+      "province": "San José, Costa Rica",
+      "locality": "Zona de los Santos (San Marcos, Tarrazú / Dota)",
+      "elevationMeters": 1650
     },
     "citesStatus": {
-      "appendix": "Endémica de Costa Rica",
-      "distribution": "Microendémica de la Zona de los Santos (Tarrazú, Dota, León Cortés)"
+      "appendix": "Apéndice II",
+      "distribution": "Nativa Mesoamericana"
+    },
+    "scientificName": "Craugastor podiciferus",
+    "id": "cr-bio-0766",
+    "additionalPhotos": [],
+    "updatedAt": "2026-11-05T20:01:03.082Z",
+    "fieldFolio": "Ficha Folio #83",
+    "catalogNumber": "CAT. CR-BIO-2026-3128",
+    "taxonGroup": "Amphibia",
+    "collectionDate": "2026-11-05",
+    "sightings": [],
+    "collector": "Ing. Carvajal V."
+  },
+  {
+    "commonName": "Serpiente Lora",
+    "sightings": [],
+    "curationStatus": "Verificada",
+    "georeference": {
+      "microhabitat": "Vegetación riparia y ramas caídas",
+      "accuracyMeters": 3.2,
+      "latitude": 9.59984017431328,
+      "province": "San José, Costa Rica",
+      "locality": "Zona de los Santos (San Marcos, Tarrazú / Dota)",
+      "datum": "WGS84",
+      "lifeZone": "Bosque Muy Húmedo Montano Bajo (bmh-MB)",
+      "longitude": -83.98010892772822,
+      "conservationArea": "Área de Conservación Pacífico Central (ACOPAC)",
+      "latitudeDMS": "9°35'59.4\" N",
+      "elevationMeters": 1650,
+      "longitudeDMS": "83°58'48.4\" W"
+    },
+    "collector": "Ing. Carvajal V.",
+    "collectionTime": "12:47 CST",
+    "scientificName": "Bothriechis lateralis",
+    "bioacoustics": null,
+    "id": "cr-bio-1103",
+    "darwinCoreSync": true,
+    "taxonomy": {
+      "class": "Reptilia",
+      "genus": "",
+      "order": "Squamata",
+      "species": "lateralis",
+      "family": "",
+      "phylum": "Chordata",
+      "kingdom": "Animalia",
+      "taxonId": "8408"
+    },
+    "iucnStatus": {
+      "code": "LC",
+      "trend": "Población Estable",
+      "label": "Preocupación Menor"
+    },
+    "catalogNumber": "CAT. CR-BIO-2026-6556",
+    "updatedAt": "2026-11-05T20:01:03.082Z",
+    "realm": "Neotropical",
+    "citesStatus": {
+      "appendix": "Apéndice II",
+      "distribution": "Nativa Mesoamericana"
+    },
+    "morphometrics": {
+      "confirmedScientificData": "Distribución y hábitat: Especie endémica de las cordilleras de Costa Rica y el oeste de Panamá. Habita principalmente en bosques pluviales premontanos y montanos bajos, con un rango altitudinal típico de 800 a 2.000 m.s.n.m. (frecuente en Monteverde, Cordillera Volcánica Central, Valle Central y Cerros de Escazú).\n\nInvestigación toxicológica (ICP-UCR): Ampliamente estudiada por el Instituto Clodomiro Picado. Su veneno es neutralizado de forma efectiva por el suero antiofídico polivalente producido por la Universidad de Costa Rica.\n\nConservación (SINAC): Vulnerable a la fragmentación del dosel arbóreo y a la pérdida de cobertura forestal en zonas cafetaleras y periurbanas de las laderas del Valle Central.",
+      "interspecificRelations": "Comportamiento defensivo: Confía plenamente en su camuflaje críptico sobre follaje. Al verse amenazada, abre la boca mostrando el revestimiento interno claro, adopta una postura en \"S\" con la cabeza levantada y muerde velozmente si se invade su distancia crítica.Toxicología del veneno: Veneno hemotóxico y citotóxico (metaloproteinasas y fosfolipasas $A_2$). Provoca edema severo, dolor agudo, hemorragia local y necrosis moderada.Simpatría y competencia: Coexiste en bosques premontanos y montanos con Bothriechis nigroviridis (en cotas más altas), Bothriechis schlegelii (en zonas de transición más bajas) e imitadoras inofensivas como Leptophis ahaetulla o Oxybelis brevirostris.Depredadores: Aves rapaces medianas, aves nocturnas (búhos), mamíferos arborícolas y serpientes ofiófagas (e.g., Clelia clelia juvenil o colúbridos de altura).",
+      "colorationAndAnatomy": "Morfología: Serpiente vipérida arbórea de cuerpo delgado y comprimido lateralmente, con una cola prensil fuerte adaptada a la vegetación. Longitud promedio entre 60 y 80 cm (máximo ~100 cm). Cabeza marcadamente triangular y foseta loreal evidente.\n\nEscamación: Escamas dorsales fuertemente quilladas dispuestas en 21–23 filas a mitad del cuerpo. Escama supraocular grande y ancha, sin proyecciones espinosas evidentes sobre el ojo. Escamas subcaudales enteras (rango de 55 a 72).\n\nColoración: Verde esmeralda a verde hoja uniforme en adultos. Presenta una línea lateral ventrolateral amarilla o blanco-amarillenta muy distintiva a cada lado del cuerpo (de ahí su nombre lateralis). Vientre amarillo pálido o verde claro. Los juveniles nacen de color amarillo pálido o marrón claro con la punta de la cola contrastante, cambiando al verde adulto a medida que maduran (cambio ontogenético).\n",
+      "sympatricSpecies": [],
+      "courtshipAndMating": "Modo reproductivo: Vivípara.\n\nCamada: Partos de entre 6 y 20 crías, nacidas típicamente durante la estación lluviosa.\n\nCortejo: Localización química por rastreo de feromonas en ramas y arbustos. El macho realiza aproximaciones lentas y movimientos rítmicos de cortejo sobre el lomo de la hembra antes de la cópula.\n\nCuidado parental: Nulo. Las crías se dispersan inmediatamente entre la vegetación baja tras nacer.",
+      "ethologyAndReproduction": "Patrón de actividad: Principalmente nocturna y crepuscular; pasa el día inmóvil enrollada entre bromelias, epífitas o ramas delgadas.\n\nTermorregulación: Heliofilia pasiva; se expone discretamente a la radiación filtrada en los estratos medios de la vegetación durante las primeras horas de sol tras noches frías de montaña.\n\nEstratificación y forrajeo: Estrictamente arbórea (estrato bajo y medio, de 1 a 3 metros del suelo). Cazadora al acecho (sit-and-wait). Su dieta incluye ranas arborícolas (hílidos), salamandras, lagartijas (Norops) y, conforme crece, pequeños roedores y aves dormidas. Los juveniles aplican señuelo caudal (caudal luring) moviendo la punta de la cola para atraer presas.",
+      "snoutVentLengthMm": 58
+    },
+    "additionalPhotos": [
+      {
+        "label": "Lora juvenil",
+        "description": "Su coloración es distinta para poder camuflarse",
+        "id": "photo-1793905784612",
+        "url": "https://www.icp.ucr.ac.cr/sites/default/files/styles/foto_galeria_grande/public/content/Copia%20de%20Bothriechis%20lateralis.%20Lora%20venenosa%20Autor%20Alejandro%20Solorzano..jpg?h=284a073f&itok=OSW1r1Rv"
+      }
+    ],
+    "heroImage": "/uploads/bothriechis_lateralis.jpg",
+    "fieldFolio": "Ficha Folio #47",
+    "heroImageDescription": "Espécimen de campo de Bothriechis lateralis registrado en Zona de los Santos (San Marcos, Tarrazú / Dota).",
+    "institutionCode": "UCR-MZ",
+    "collectionDate": "2026-11-05",
+    "taxonGroup": "Reptilia"
+  },
+  {
+    "citesStatus": {
+      "distribution": "Microendémica de la Zona de los Santos (Tarrazú, Dota, León Cortés)",
+      "appendix": "Endémica de Costa Rica"
+    },
+    "updatedAt": "2026-11-05T20:01:03.082Z",
+    "commonName": "Rana de las Nacientes / Rana Cafetera / Nacientes Treefrog",
+    "darwinCoreSync": true,
+    "scientificName": "Isthmohyla nacientes",
+    "georeference": {
+      "latitudeDMS": "9°39'45.0\" N",
+      "conservationArea": "Área de Conservación Central (ACC) / Cordillera de Talamanca",
+      "longitude": -84.0222,
+      "microhabitat": "Follaje ribereño sobre nacientes de montaña y quebradas cristalinas adyacentes a cafetales de sombra",
+      "province": "San José, Costa Rica",
+      "locality": "San Lorenzo de Tarrazú / Quebrada Las Nacientes, Zona de los Santos",
+      "longitudeDMS": "84°01'20.0\" W",
+      "latitude": 9.6625,
+      "elevationMeters": 1650,
+      "accuracyMeters": 3.5,
+      "lifeZone": "Bosque Pluvial Montano Bajo y Bosque Muy Húmedo Premontano",
+      "datum": "WGS84"
     },
     "taxonomy": {
+      "class": "Amphibia",
+      "species": "nacientes",
+      "genus": "Isthmohyla",
+      "order": "Anura",
+      "taxonId": "LSID:urn:lsid:zoobank.org:act:2026-INAC",
       "kingdom": "Animalia",
       "phylum": "Chordata",
-      "class": "Amphibia",
-      "order": "Anura",
-      "family": "Hylidae",
-      "genus": "Isthmohyla",
-      "species": "nacientes",
-      "taxonId": "LSID:urn:lsid:zoobank.org:act:2026-INAC"
+      "family": "Hylidae"
     },
-    "heroImage": "/isthmohyla_nacientes.jpg",
-    "heroImageDescription": "Fotografía científica auténtica de Isthmohyla nacientes (Rana de las Nacientes / Rana Cafetera) descubierta en la Zona de los Santos, Costa Rica.",
+    "collector": "Ing. Carvajal V. & Colaboradores (Herpetología Santos)",
+    "curationStatus": "Verificada",
+    "sightings": [],
+    "iucnStatus": {
+      "label": "Vulnerable (Endémica de Costa Rica)",
+      "code": "VU",
+      "trend": "Microendémica / Sensible a Fuentes Hídricas"
+    },
+    "collectionTime": "20:30 CST",
     "bioacoustics": {
       "title": "Canto de Anuncio Ripario",
       "callType": "Vocalización Territorial / Reproductiva de Alta Frecuencia",
@@ -41,124 +181,252 @@
       "durationSeconds": 18,
       "audioPatternDescription": "Pulsos agudos y rápidos de alta frecuencia emitidos para competir acústicamente sobre el ruido del agua corriente en nacientes."
     },
-    "georeference": {
-      "latitude": 9.6625,
-      "longitude": -84.0222,
-      "latitudeDMS": "9°39'45.0\" N",
-      "longitudeDMS": "84°01'20.0\" W",
-      "datum": "WGS84",
-      "accuracyMeters": 3.5,
-      "elevationMeters": 1650,
-      "locality": "San Lorenzo de Tarrazú / Quebrada Las Nacientes, Zona de los Santos",
-      "province": "San José, Costa Rica",
-      "conservationArea": "Área de Conservación Central (ACC) / Cordillera de Talamanca",
-      "lifeZone": "Bosque Pluvial Montano Bajo y Bosque Muy Húmedo Premontano",
-      "microhabitat": "Follaje ribereño sobre nacientes de montaña y quebradas cristalinas adyacentes a cafetales de sombra"
-    },
+    "catalogNumber": "CAT. CR-BIO-2026-0042",
+    "collectionDate": "15 Febrero 2026",
     "morphometrics": {
-      "snoutVentLengthMm": 31.8,
-      "colorationAndAnatomy": "Ranita de porte pequeño, longitud hocico-cloaca menor a 4 cm (machos adultos 28.0–32.5 mm, hembras 33.0–37.8 mm). Coloración dorsal verde metálico brillante uniforme con sutil punteado oscuro y piel finamente granular. Iris prominente de tono cobrizo-dorado a rojizo con fina reticulación negra y pupila horizontal. Vientre crema-blanquecino translúcido. Discos digitales moderadamente expandidos adaptados a la vegetación ribereña húmeda y rocas resbaladizas.",
       "ethologyAndReproduction": "Especie nocturna estrechamente vinculada a nacientes y quebradas de montaña con corriente limpia y oxigenada. Los machos cantan perchados sobre hojas de arbustos y helechos a baja altura (0.3 a 1.5 m) directamente sobre el curso del agua. Los renacuajos completan su metamorfosis en remansos pedregosos de aguas frías y oxigenadas.",
-      "courtshipAndMating": "Cortejo es un llamado del macho constante y la hembra se acerca, no hay más datos en este momento de verificación científica.",
-      "interspecificRelations": "Congénere de las ranas de montaña de Talamanca Isthmohyla rivularis e Isthmohyla tica, con las cuales fue confundida en colectas históricas de la década de 1960 hasta que análisis moleculares y bioacústicos en 2026 demostraron su independencia evolutiva. Comparte microhábitat ribereño con ranitas de hojarasca Craugastor podiciferus y Pristimantis cruentus. Es una especie bioindicadora clave de la pureza de las fuentes hídricas de la región.",
+      "colorationAndAnatomy": "Ranita de porte pequeño, longitud hocico-cloaca menor a 4 cm (machos adultos 28.0–32.5 mm, hembras 33.0–37.8 mm). Coloración dorsal verde metálico brillante uniforme con sutil punteado oscuro y piel finamente granular. Iris prominente de tono cobrizo-dorado a rojizo con fina reticulación negra y pupila horizontal. Vientre crema-blanquecino translúcido. Discos digitales moderadamente expandidos adaptados a la vegetación ribereña húmeda y rocas resbaladizas.",
+      "sympatricSpecies": [],
+      "snoutVentLengthMm": 31.8,
       "confirmedScientificData": "Descrita formalmente a inicios de 2026 en la revista científica Ichthyology & Herpetology por los investigadores Wagner Chaves-Acuña, Juan Abarca, Jonathan Navarro-Picado, Esteban Hidalgo-Mora, Marilyn Ureña-Chaves, Alejandro Valverde-Castillo, Gerardo Chaves, Federico Bolaños y Julián Faivovich. Especie endémica de Costa Rica redescubierta en San Lorenzo de Tarrazú en 2021 y validada mediante evidencia integrativa genética, morfológica y bioacústica.",
-      "sympatricSpecies": []
+      "courtshipAndMating": "Cortejo es un llamado del macho constante y la hembra se acerca, no hay más datos en este momento de verificación científica.",
+      "interspecificRelations": "Congénere de las ranas de montaña de Talamanca Isthmohyla rivularis e Isthmohyla tica, con las cuales fue confundida en colectas históricas de la década de 1960 hasta que análisis moleculares y bioacústicos en 2026 demostraron su independencia evolutiva. Comparte microhábitat ribereño con ranitas de hojarasca Craugastor podiciferus y Pristimantis cruentus. Es una especie bioindicadora clave de la pureza de las fuentes hídricas de la región."
     },
+    "institutionCode": "UCR-MZ / UNA",
+    "heroImage": "/isthmohyla_nacientes.jpg",
+    "heroImageDescription": "Fotografía científica auténtica de Isthmohyla nacientes (Rana de las Nacientes / Rana Cafetera) descubierta en la Zona de los Santos, Costa Rica.",
+    "taxonGroup": "Amphibia",
+    "realm": "Neotropical",
+    "id": "cr-bio-2026-0042",
+    "fieldFolio": "Ficha Holotipo / Paratipo Folio #01-Santos",
     "additionalPhotos": [
       {
-        "id": "photo-1",
+        "description": "Fotografía en vida de Isthmohyla nacientes sobre follaje de naciente en Los Santos.",
         "url": "/isthmohyla_nacientes.jpg",
         "label": "Ejemplar en Campo",
-        "description": "Fotografía en vida de Isthmohyla nacientes sobre follaje de naciente en Los Santos."
+        "id": "photo-1"
       },
       {
-        "id": "photo-2",
         "url": "/isthmohyla_nacientes_habitat.jpg",
         "label": "Naciente & Hábitat Ripario",
+        "id": "photo-2",
         "description": "Microhábitat de naciente y quebrada cristalina de montaña en la Zona de los Santos."
       },
       {
+        "description": "Macro zoom de alta precisión y nitidez del ojo de Isthmohyla nacientes. Se aprecia el iris cobrizo-dorado metálico característico con reticulaciones oscuras dendríticas, pupila horizontal adaptada a baja luminosidad en quebradas y piel verde esmeralda con gránulos cutáneos húmedos.",
         "id": "photo-3",
-        "url": "/isthmohyla_nacientes_eye_zoom.jpg",
         "label": "Detalle Ocular",
-        "description": "Macro zoom de alta precisión y nitidez del ojo de Isthmohyla nacientes. Se aprecia el iris cobrizo-dorado metálico característico con reticulaciones oscuras dendríticas, pupila horizontal adaptada a baja luminosidad en quebradas y piel verde esmeralda con gránulos cutáneos húmedos."
+        "url": "/isthmohyla_nacientes_eye_zoom.jpg"
       },
       {
-        "id": "photo-4",
-        "url": "/hallazgo_macho_un_ojo.jpg",
+        "description": "Hallazgo curioso en Santa María de Dota (Viernes 9): Macho adulto de Isthmohyla nacientes al que le falta un ojo (anoftalmia/cicatrización natural). Era el que cantaba con mayor potencia acústica a 45 cm del caudal.",
         "label": "Hallazgo: Macho Tuerto",
-        "description": "Hallazgo curioso en Santa María de Dota (Viernes 9): Macho adulto de Isthmohyla nacientes al que le falta un ojo (anoftalmia/cicatrización natural). Era el que cantaba con mayor potencia acústica a 45 cm del caudal."
-      }
-    ],
-    "sightings": [
-      {
-        "id": "sight-dota-20261009",
-        "timestamp": "09 Oct 2026, 20:15 CST (Viernes)",
-        "date": "2026-10-09",
-        "observer": "Ing. Carvajal V.",
-        "locality": "Quebrada en Santa María de Dota, Los Santos",
-        "coordinates": "9°39'10.5\" N, 83°58'22.0\" W",
-        "count": 11,
-        "individualsCount": 11,
-        "microhabitat": "Ramas caídas y vegetación riparia a unos 45 cm del caudal de agua cristalina, a 45 m de la entrada del sitio.",
-        "weather": "Noche húmeda de montaña en quebrada riparia, 16.8°C",
-        "temperatureC": 16.8,
-        "behaviorObserved": "11 individuos activos cantando fuertemente en el curso de la quebrada.",
-        "notes": "Población vigorosa y activa en nuevo punto de monitoreo en Dota.",
-        "vitalityStatus": "VIVO",
-        "lifeStage": "ADULTO",
-        "sex": "MACHO",
-        "isCuriousFinding": true,
-        "curiousFindingTitle": "Macho cantor al que le falta un ojo (Anoftalmia)",
-        "curiousFindingDescription": "Hallazgo sumamente curioso: se encontró un macho adulto activo al que le faltaba completamente un ojo (cicatrización natural). A pesar de la pérdida ocular, era el macho que cantaba con mayor potencia y volumen de todo el coro ribereño. Estaba posado sobre ramas caídas a 45 cm del caudal y a 45 m de la entrada del sitio.",
-        "curiousFindingPhoto": "/hallazgo_macho_un_ojo.jpg"
-      },
-      {
-        "id": "sight-cascadas-vinotinto-20260828",
-        "timestamp": "28 Ago 2026, 19:40 CST",
-        "date": "2026-08-28",
-        "observer": "Ing. Carvajal V.",
-        "locality": "Cascadas vino tinto, Zona de los Santos",
-        "coordinates": "9°39'25.0\" N, 84°00'50.0\" W",
-        "count": 34,
-        "individualsCount": 34,
-        "microhabitat": "Vegetación riparia húmeda y rocas musgosas adyacentes a las cascadas vino tinto con spray constante.",
-        "weather": "Noche húmeda de montaña en zona de cascada, 17.2°C, HR 98%",
-        "temperatureC": 17.2,
-        "behaviorObserved": "Observación de 34 individuos activos cantando fuertemente en el curso y spray de las cascadas vino tinto.",
-        "notes": "Población excepcionalmente numerosa y activa registrada en Cascadas vino tinto. Registro científico de alta concentración de individuos en microhábitat de cascada.",
-        "vitalityStatus": "VIVO",
-        "lifeStage": "ADULTO",
-        "sex": "NO_APLICA"
-      },
-      {
-        "id": "sight-2",
-        "timestamp": "16 Feb 2026, 06:15 CST",
-        "date": "2026-02-16",
-        "observer": "Ing. Carvajal V.",
-        "locality": "San Lorenzo de Tarrazú, Sector Quebrada Alta",
-        "coordinates": "9°39'42.1\" N, 84°01'18.5\" W",
-        "count": 1,
-        "microhabitat": "Vegetación riparia adyacente a naciente de agua pura",
-        "weather": "Neblina matutina de montaña, 16°C",
-        "temperatureC": 16,
-        "behaviorObserved": "Individuo en reposo diurno refugiado en axila foliar húmeda.",
-        "notes": "Registro fotográfico y medición morfométrica realizada sin perturbación."
-      },
-      {
-        "id": "sight-1",
-        "timestamp": "15 Feb 2026, 20:30 CST",
-        "date": "2026-02-15",
-        "observer": "Ing. Carvajal V. & Colaboradores",
-        "locality": "San Lorenzo de Tarrazú, Quebrada Las Nacientes",
-        "coordinates": "9°39'45.0\" N, 84°01'20.0\" W",
-        "count": 2,
-        "microhabitat": "Envés de hoja de helecho ribereño a 0.8 m sobre la naciente de agua",
-        "weather": "Noche fresca con llovizna fina de montaña, HR 96%",
-        "temperatureC": 17.5,
-        "behaviorObserved": "Macho adulto vocalizando activamente sobre corriente de naciente. Segundo individuo localizado a 2 metros río arriba.",
-        "notes": "Confirmación en campo de Isthmohyla nacientes en naciente protegida dentro de finca con café bajo sombra."
+        "id": "photo-4",
+        "url": "/hallazgo_macho_un_ojo.jpg"
       }
     ]
+  },
+  {
+    "heroImage": "/uploads/cerrophidium_sasai.jpg",
+    "taxonomy": {
+      "genus": "",
+      "taxonId": "8408",
+      "class": "Reptilia",
+      "kingdom": "Animalia",
+      "order": "Squamata",
+      "species": "sasai",
+      "family": "",
+      "phylum": "Chordata"
+    },
+    "iucnStatus": {
+      "label": "Preocupación Menor",
+      "code": "LC",
+      "trend": "Población Estable"
+    },
+    "id": "cr-bio-2212",
+    "morphometrics": {
+      "interspecificRelations": "Comportamiento defensivo: Conducta primaria críptica (tanatosis o inmovilidad absoluta confiando en el camuflaje). Al sentirse amenazada, aplana lateralmente el cuerpo, enrolla su tercio anterior en forma de \"S\", bufa o emite silbidos respiratorios audibles y realiza ataques cortos y secos.\n\nToxicología del veneno: Veneno hemotóxico y citotóxico característico de vipéridos mesoamericanos, con actividad proteolítica, edematizante, hemorrágica y desfibrinante.\n\nEspecies simpátricas y competencia: Coexiste en pisos altitudinales de bosque nuboso y subpáramo con otros reptiles como Mesaspis monticola, Abronia/Gerrhonotus, Geophis godmani, Ninia celata y anfibios del género Incilius o Bolitoglossa. No presenta competencia directa con vipéridos de tierras bajas, restringiéndose su interacción ecológica a microambientes fríos.\n\nDepredadores potenciales: Aves rapaces de montaña (e.g., Buteo jamaicensis, falconiformes), carnívoros medianos (mustélidos como Mustela frenata, prociónidos como Nasua narica) y ofidios ofiófagos ocasionales de zonas templadas.",
+      "ethologyAndReproduction": "Patrón de actividad: Principalmente diurna y crepuscular, condicionada fuertemente por la temperatura ambiental de alta montaña. En días nublados con neblina o tras lluvias ligeras de media tarde se observa activa sobre la hojarasca.\n\nTermorregulación: Ectotermia heliotérmica activa. Aprovecha claros de bosque, bordes de senderos, taludes descubiertos y troncos caídos para asolearse en las primeras horas de radiación solar directa matutina.\n\nEstratificación y forrajeo: Estrictamente terrestre y semi-criptozóica. Utiliza una estrategia de forrajeo pasivo por emboscada (sit-and-wait), camuflándose entre la hojarasca gruesa, capas de musgo (Sphagnum) y raíces expuestas de robledales. Dieta compuesta principalmente por micromamíferos (roedores múridos locales, musarañas del género Cryptotis) y pequeños lagartos de altura (principalmente Mesaspis monticola / Gerrhonotus).",
+      "courtshipAndMating": "Modo reproductivo: Vivípara (u ovovivípara con retención y desarrollo intrauterino completo).\n\nFecundidad y gestación: Partos registrados de entre 3 y 11 crías neonatas, coincidiendo los nacimientos generalmente con los meses de transición hacia la época lluviosa o mediados de esta (mayo a septiembre), garantizando abundancia de presas juveniles.\n\nCortejo y cópula: Estacional; el macho localiza a la hembra mediante rastreo quimiorreceptor (lengua bífida y órgano vomeronasal). No se han documentado combates rituales complejos prolongados entre machos para esta especie en vida libre.\n\nCuidado parental: Ausente tras el nacimiento. Las crías nacen completamente independientes, con saco vitelino reabsorbido y aparato inoculador de veneno plenamente funcional.",
+      "snoutVentLengthMm": 58,
+      "sympatricSpecies": [],
+      "confirmedScientificData": "Revisión taxonómica y estatus: Históricamente asignada y confundida como parte del complejo Cerrophidion godmani. Los estudios morfológicos y filogenéticos moleculares realizados por Campbell & Flores-Villela (2008) y validaron a Cerrophidion sasai como especie plena, restringiendo su distribución al istmo centroamericano austral (Cordillera Central y Cordillera de Talamanca en Costa Rica hasta el oeste de Panamá).\n\nRango altitudinal y distribución: Restringida a pisos montanos altos y bosque nuboso montano bajo, típicamente entre los 1.500 y más de 3.000 m.s.n.m. (frecuente en Parque Nacional Volcán Poás, Barva, Parque Nacional Braulio Carrillo - sector alto, y Macizo de la Muerte / PN Tapantí - Macizo Cerro de la Muerte).\n\nInvestigación toxicológica (Instituto Clodomiro Picado - UCR): La composición proteómica y neutralización de su veneno ha sido evaluada por el ICP-UCR dentro de los ensayos de reactividad cruzada del suero polivalente costarricense, confirmando la neutralización eficaz contra las actividades coagulante y proteolítica de los miembros del complejo de tobobas de altura.",
+      "colorationAndAnatomy": "Morfología general: Serpiente vipérida de cuerpo robusto, cilíndrico y longitud total moderada/corta, generalmente entre 50 y 65 cm (raramente superando los 75 cm). Cabeza triangular, bien diferenciada del cuello, con hocico ligeramente redondeado y presencia de foseta loreal termorreceptora conspicua entre el ojo y el orificio nasal.\n\nEscamación diagnóstica: Escamas dorsales fuertemente quilladas dispuestas usualmente en 21 filas a mitad del cuerpo (rango 21–23). Escamas intersomitales reducidas, placa rostral no levantada. Escamas supraoculares enteras, sin proyecciones espinosas. Escamas ventrales entre 120–135; placa anal entera; escamas subcaudales enteras (no divididas), oscilando típicamente entre 25 y 37.\n\nPatrón de coloración: Fondo dorsal variable, desde marrón grisáceo, ocre, pardo rojizo hasta oliva oscuro. Exhibe una serie vertebral de manchas romboidales, cuadrangulares o en forma de barra marrón oscuro a casi negro, delimitadas a veces por finos bordes claros o amarillentos. En los flancos presenta manchas alternas más tenues. Vientre claro a amarillento, fuertemente jaspeado o punteado de gris carbón o negro. Banda postocular oscura gruesa que recorre desde detrás del ojo hasta la comisura mandibular, bordeada superiormente por una línea pálida."
+    },
+    "collectionDate": "2026-11-05",
+    "commonName": "Toboba de altura",
+    "realm": "Neotropical",
+    "additionalPhotos": [
+      {
+        "description": "Fotografía de campo agregada por URL.",
+        "url": "https://inaturalist-open-data.s3.amazonaws.com/photos/57420507/medium.jpg",
+        "id": "photo-1793904065977",
+        "label": "Morfo coloración"
+      }
+    ],
+    "darwinCoreSync": true,
+    "fieldFolio": "Ficha Folio #66",
+    "updatedAt": "2026-11-05T20:01:03.082Z",
+    "taxonGroup": "Reptilia",
+    "citesStatus": {
+      "distribution": "Nativa Mesoamericana",
+      "appendix": "Apéndice II"
+    },
+    "institutionCode": "UCR-MZ",
+    "collector": "Ing. Carvajal V.",
+    "sightings": [],
+    "catalogNumber": "CAT. CR-BIO-2026-7338",
+    "curationStatus": "Verificada",
+    "georeference": {
+      "conservationArea": "Área de Conservación Pacífico Central (ACOPAC)",
+      "datum": "WGS84",
+      "latitudeDMS": "9°35'28.0\" N",
+      "longitude": -83.97786105391734,
+      "longitudeDMS": "83°58'40.3\" W",
+      "microhabitat": "Vegetación riparia y ramas caídas",
+      "accuracyMeters": 3.2,
+      "locality": "Zona de los Santos (San Marcos, Tarrazú / Dota)",
+      "elevationMeters": 1650,
+      "latitude": 9.59110214232553,
+      "province": "San José, Costa Rica",
+      "lifeZone": "Bosque Muy Húmedo Montano Bajo (bmh-MB)"
+    },
+    "heroImageDescription": "Espécimen de campo de Cerrophidium sasai registrado en Zona de los Santos (San Marcos, Tarrazú / Dota).",
+    "collectionTime": "11:21 CST",
+    "scientificName": "Cerrophidium sasai",
+    "bioacoustics": null
+  },
+  {
+    "institutionCode": "UCR-MZ",
+    "morphometrics": {
+      "interspecificRelations": "Comportamiento defensivo y territorial: Los machos son fuertemente territoriales; defienden las hojas de llamada combatiendo físicamente cuerpo a cuerpo, colgándose de las patas traseras y usando sus espinas humerales para prensar y empujar al oponente.\n\nSimpatría: Comparte microhábitats riparios con otros centrolénidos (Teratohyla spinosa, Sachatamia albomaculata, Hyalinobatrachium fleischmanni) y con ranas de la familia Hylidae.\n\nDepredación: Huevos depredados frecuentemente por larvas de moscas (Drosophilidae), avispas y pequeñas serpientes arborícolas (Imantodes, Leptodeira). Los adultos son presa de arañas errantes (Phoneutria / Trechaleidae) y murciélagos.",
+      "ethologyAndReproduction": "Patrón de actividad: Estrictamente nocturna; durante el día duerme inmóvil pegada al envés de hojas anchas sobre o cerca de corrientes de agua.\n\nEstratificación y forrajeo: Arbórea de sotobosque ripario, común a alturas de 1 a 3 metros sobre riachuelos de corriente rápida. Dieta insectívora generalista compuesta por pequeños artrópodos (mosquitos, pequeñas polillas, escarabajos y arañas).\n\nBioacústica: El macho emite un canto territorial y de llamada corto y agudo, consistente en notas tipo \"tik\" o \"chick\" repetidas a intervalos irregulares desde el haz o envés de las hojas.",
+      "colorationAndAnatomy": "Morfología: Anuro pequeño y grácil. Machos adultos de 21 a 28 mm; hembras de 25 a 32 mm. Cabeza ancha, hocico truncado y ojos grandes con pupilas horizontales. Los machos presentan una conspicua espina humeral ósea sobre la articulación del brazo (diagnóstica en el género).\n\nColoración: Dorso verde esmeralda brillante salpicado de pequeños puntos negros y, con frecuencia, diminutos puntos amarillos. Vientre transparente en la porción posterior; peritoneo parietal blanco que cubre el corazón (pericardio blanco, corazón no visible a través de la piel, pero intestinos sí observables). Huesos de color verde debido a la acumulación de biliverdina.",
+      "snoutVentLengthMm": 58,
+      "courtshipAndMating": "Modo reproductivo: Ovípara con desarrollo larvario acuático.\n\nPuesta: Ponen masas gelatinosas de 20 a 40 huevos de color negro o gris oscuro envueltos en gelatina transparente, adheridos casi siempre al haz o envés de hojas que cuelgan directamente sobre pozas o secciones lentas del río. Al eclosionar, los renacuajos caen al agua.\n\nCuidado parental: A diferencia de otros centrolénidos (como Hyalinobatrachium), el macho no realiza un cuidado parental activo prolongado de las masas de huevos tras la fertilización.\n",
+      "sympatricSpecies": [],
+      "confirmedScientificData": "Distribución y altitud en CR: Amplia distribución en ambas vertientes (Pacífica y Caribe), desde tierras bajas hasta elevaciones intermedias (0 a 1.500 m.s.n.m.), siendo común en Estación Biológica La Selva (OET), Rincón de la Vieja, Parque Nacional Tapantí y Península de Osa.\n\nBioindicador ecológico: Especie modelo en estudios de la UCR y monitoreos del SINAC como bioindicador de la calidad del agua e integridad del bosque ripario, debido a la sensibilidad extrema de sus puestas y piel a la contaminación, sedimentación y desecación.\n\nResistencia a patógenos: Ampliamente monitoreada por la comunidad científica respecto al hongo quítrido (Batrachochytrium dendrobatidis); mantiene poblaciones estables en varias cuencas a pesar de la presencia del patógeno."
+    },
+    "collectionDate": "2026-11-05",
+    "commonName": "Rana de cristal esmeralda",
+    "citesStatus": {
+      "distribution": "Nativa Mesoamericana",
+      "appendix": "Apéndice II"
+    },
+    "id": "cr-bio-3415",
+    "iucnStatus": {
+      "trend": "Población Estable",
+      "code": "LC",
+      "label": "Preocupación Menor"
+    },
+    "heroImage": "https://www.aquaportail.com/aquabdd/photos/espadarana-prosoblepon.webp",
+    "darwinCoreSync": true,
+    "taxonomy": {
+      "order": "Anura",
+      "genus": "",
+      "family": "",
+      "phylum": "Chordata",
+      "species": "prosoblepon",
+      "class": "Amphibia",
+      "kingdom": "Animalia",
+      "taxonId": "8408"
+    },
+    "collector": "Ing. Carvajal V.",
+    "additionalPhotos": [
+      {
+        "id": "photo-1793906191799",
+        "description": "Fotografía de campo agregada por URL.",
+        "label": "Puesta",
+        "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSSm9k2NdhGdDkugkqhp0J55U6x7T_NJfdm46ciQCmuu8fBZlkx7Mh9GLE4&s=10"
+      }
+    ],
+    "sightings": [],
+    "collectionTime": "13:14 CST",
+    "taxonGroup": "Amphibia",
+    "curationStatus": "Verificada",
+    "updatedAt": "2026-11-05T20:01:03.082Z",
+    "bioacoustics": null,
+    "catalogNumber": "CAT. CR-BIO-2026-5521",
+    "fieldFolio": "Ficha Folio #21",
+    "realm": "Neotropical",
+    "scientificName": "Espadarana prosoblepon",
+    "heroImageDescription": "Espécimen de campo de Espadarana prosoblepon registrado en Zona de los Santos (San Marcos, Tarrazú / Dota).",
+    "georeference": {
+      "conservationArea": "Área de Conservación Pacífico Central (ACOPAC)",
+      "datum": "WGS84",
+      "latitudeDMS": "9°39'38.9\" N",
+      "longitudeDMS": "84°1'13.8\" W",
+      "longitude": -84.0205,
+      "microhabitat": "Vegetación riparia y ramas caídas",
+      "accuracyMeters": 3.2,
+      "elevationMeters": 1650,
+      "province": "San José, Costa Rica",
+      "latitude": 9.6608,
+      "locality": "Zona de los Santos (San Marcos, Tarrazú / Dota)",
+      "lifeZone": "Bosque Muy Húmedo Montano Bajo (bmh-MB)"
+    }
+  },
+  {
+    "collectionTime": "13:35 CST",
+    "institutionCode": "UCR-MZ",
+    "commonName": "Salamandra Negruzca ",
+    "collector": "Ing. Carvajal V.",
+    "curationStatus": "Verificada",
+    "sightings": [],
+    "morphometrics": {
+      "sympatricSpecies": [],
+      "interspecificRelations": "Comportamiento defensivo: Movimientos lentos y enrollamiento pasivo del cuerpo. Al ser perturbada, secreta sustancias viscosas y de mal sabor a través de glándulas cutáneas lumbares/caudales. Posee capacidad de autotomía caudal ante ataques severos para distraer al depredador.\n\nSimpatría: Coexiste en bosques montanos y premontanos con otras salamandras del género Bolitoglossa (como B. pesrubra en cotas más altas o B. subpalmata sensu lato), ranas de hojarasca (Craugastor spp.) y pequeñas serpientes fosoriales.\n\nDepredadores: Serpientes de hojarasca ofiófagas e invertebrados mayores (escolopendras, arañas errantes), así como pequeñas aves y mamíferos que escarban el sustrato forestal.",
+      "courtshipAndMating": "Modo reproductivo: Desarrollo directo terrestre (independiente de cuerpos de agua libres, sin metamorfosis ni renacuajo acuático).\n\nCortejo y fertilización: Involucra estimulación química mediante glándulas mentonianas del macho aplicadas sobre la cabeza/dorso de la hembra (\"paseo de cortejo\"), culminando con la deposición de un espermatóforo terrestre que la hembra recoge con los labios cloacales.\n\nPuesta y cuidado parental: Paquetes pequeños de huevos esféricos no pigmentados depositados en grietas profundas del suelo, bajo troncos podridos o cavidades de musgo húmedo. Como en muchas especies del género, la hembra suele permanecer enrollada alrededor de la masa de huevos durante la incubación para mantener la hidratación y protegerlos de hongos patógenos hasta la eclosión de salamandras juveniles completamente formadas.",
+      "confirmedScientificData": "Taxonomía y estatus evolutivo: Descrita originalmente por Taylor (1949). Durante décadas, el complejo taxonómico de las salamandras oscuras de Mesoamérica (Bolitoglossa subgénero Magnadigita) fue objeto de revisiones morfológicas y filogenéticas por investigadores de la UCR y especialistas internacionales (como David Wake y colaboradores), delimitando su estatus y diferenciándola de formas afines mediante caracteres dentarios maxilares y morfometría de patas.\n\nDistribución geográfica y altitud: Especie endémica de Costa Rica (vertiente caribeña y cordilleras medias/altas, con registros en laderas montanas medias de la Cordillera Central y Talamanca, abarcando típicamente rangos premontanos y montano bajos entre los 1.000 y 2.000 m.s.n.m.).\n\nConservación y registros: Catalogada como especie con poblaciones discretas y baja densidad de encuentro en monitoreos de campo del SINAC. Muy susceptible a la perturbación del microhábitat de sotobosque y a eventos de sequía microclimática vinculados al cambio global en bosques nubosos.",
+      "colorationAndAnatomy": "Morfología: Salamandra pletodóntida (Plethodontidae) de tamaño mediano a moderadamente grande y cuerpo robusto, alcanzando entre 60 y 85 mm de longitud estándar (hocico-cloaca). Cabeza ancha y ojos moderadamente prominentes con surcos nasolabiales bien definidos. Extremidades relativamente cortas con manos y pies anchos, provistos de membranas interdigitales extensas (palmeadas). Cola cilíndrica y gruesa en la base, algo más corta o igual a la longitud hocico-cloaca.\n\nColoración: Dorsalmente uniforme de color café negruzco, gris pizarra oscuro o negro carbón lustroso. Puede presentar escaso e irregular punteado grisáceo o azulado claro en los flancos. Vientre casi tan oscuro como el dorso, de tono café fuliginoso a negro mate uniforme, sin bandas contrastantes ni coloraciones aposemáticas en la base de la cola o garganta.",
+      "snoutVentLengthMm": 58,
+      "ethologyAndReproduction": "Patrón de actividad: Estrictamente nocturna; permanece oculta durante las horas diurnas para evitar la deshidratación y las variaciones térmicas.\n\nFisiología respiratoria y microclima: Como miembro de la familia Plethodontidae, carece por completo de pulmones y branquias funcionales en estado adulto; la respiración es 100% cutánea y bucofaríngea, por lo que depende de microclimas con saturación de humedad cercana al 100%.\n\nEstratificación y forrajeo: Hábitos principalmente terrestres y semifosoriales/criptozóicos, aunque muestra capacidades arborícolas facultativas (desplazamiento en vegetación baja). Durante la noche forrajea lentamente sobre hojarasca húmeda, taludes terrosos musgosos y hojas anchas bajas. Se alimenta mediante proyección balística de la lengua de pequeños invertebrados del mantillo (coleópteros diminutos, ácaros, larvas y colémbolos)."
+    },
+    "citesStatus": {
+      "distribution": "Nativa Mesoamericana",
+      "appendix": "Apéndice II"
+    },
+    "scientificName": "Bolitoglossa nigrescens",
+    "darwinCoreSync": true,
+    "heroImageDescription": "Espécimen de campo de Bolitoglossa nigrescens registrado en Zona de los Santos (San Marcos, Tarrazú / Dota).",
+    "iucnStatus": {
+      "trend": "Población Estable",
+      "label": "Preocupación Menor",
+      "code": "LC"
+    },
+    "updatedAt": "2026-11-05T20:01:03.082Z",
+    "additionalPhotos": [],
+    "bioacoustics": null,
+    "taxonomy": {
+      "phylum": "Chordata",
+      "family": "",
+      "species": "nigrescens",
+      "genus": "",
+      "class": "Amphibia",
+      "kingdom": "Animalia",
+      "taxonId": "8408",
+      "order": "Anura"
+    },
+    "georeference": {
+      "microhabitat": "Vegetación riparia y ramas caídas",
+      "locality": "Zona de los Santos (San Marcos, Tarrazú / Dota)",
+      "province": "San José, Costa Rica",
+      "latitude": 9.61547497646595,
+      "accuracyMeters": 3.2,
+      "longitude": -83.96060533015901,
+      "lifeZone": "Bosque Muy Húmedo Montano Bajo (bmh-MB)",
+      "latitudeDMS": "9°36'55.7\" N",
+      "conservationArea": "Área de Conservación Pacífico Central (ACOPAC)",
+      "datum": "WGS84",
+      "longitudeDMS": "83°57'38.2\" W",
+      "elevationMeters": 1650
+    },
+    "heroImage": "/uploads/bolitoglossa_nigrescens.jpg",
+    "realm": "Neotropical",
+    "id": "cr-bio-6557",
+    "fieldFolio": "Ficha Folio #53",
+    "catalogNumber": "CAT. CR-BIO-2026-6990",
+    "collectionDate": "2026-11-05",
+    "taxonGroup": "Amphibia"
   }
 ]

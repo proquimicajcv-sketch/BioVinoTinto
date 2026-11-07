@@ -10,7 +10,7 @@ import {
   findNearestHotspot,
   detectLocationAndLifeZone,
 } from '../data/costaRicaData';
-import { saveImageOfflineAndServer } from '../utils/offlineImageCache';
+import { saveImageOfflineAndServer, getTaxonFallbackImage } from '../utils/offlineImageCache';
 import { captureDeviceGps } from '../utils/deviceGps';
 
 interface NewSpecimenModalProps {
@@ -437,11 +437,28 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
 
 
 
-  const handleAddCustomPhoto = () => {
+  const handleAddCustomPhoto = async () => {
     if (!newPhotoUrl.trim()) return;
+    let finalPhotoUrl = newPhotoUrl.trim();
+    if (finalPhotoUrl.startsWith('http://') || finalPhotoUrl.startsWith('https://')) {
+      try {
+        const resp = await fetch('/api/cache-remote-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: finalPhotoUrl,
+            prefix: (newPhotoLabel || 'foto').replace(/\s+/g, '_'),
+          }),
+        });
+        const data = await resp.json();
+        if (data.success && data.localUrl) {
+          finalPhotoUrl = data.localUrl;
+        }
+      } catch {}
+    }
     const newEntry: PhotoRecord = {
       id: `photo-${Date.now()}`,
-      url: newPhotoUrl.trim(),
+      url: finalPhotoUrl,
       label: newPhotoLabel.trim() || 'Vista adicional',
       description: newPhotoDesc.trim() || 'Fotografía de campo agregada por URL.',
     };
@@ -491,8 +508,27 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    let finalHero = heroImage || '/isthmohyla_nacientes.jpg';
-    if (uploadedBase64 && uploadedBase64.startsWith('data:')) {
+    let finalHero = (heroImage || '').trim();
+    if (!finalHero) {
+      finalHero = getTaxonFallbackImage(taxonGroup, scientificName);
+    } else if (finalHero.startsWith('http://') || finalHero.startsWith('https://')) {
+      try {
+        const resp = await fetch('/api/cache-remote-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: finalHero,
+            prefix: (scientificName || taxonGroup || 'especie').replace(/\s+/g, '_'),
+          }),
+        });
+        const data = await resp.json();
+        if (data.success && data.localUrl) {
+          finalHero = data.localUrl;
+        }
+      } catch (err) {
+        console.warn('Error cacheando imagen web:', err);
+      }
+    } else if (uploadedBase64 && uploadedBase64.startsWith('data:')) {
       try {
         finalHero = await saveImageOfflineAndServer(uploadedBase64, 'especie_nueva');
       } catch (err) {

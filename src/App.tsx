@@ -15,7 +15,7 @@ import { DarwinCoreExporterModal } from './components/DarwinCoreExporterModal';
 import { SyncBackupModal } from './components/SyncBackupModal';
 import { StatisticsView } from './components/StatisticsView';
 import { DeviceProfileModal } from './components/DeviceProfileModal';
-import { cacheAllSpecimensMedia } from './utils/offlineImageCache';
+import { cacheAllSpecimensMedia, getTaxonFallbackImage } from './utils/offlineImageCache';
 import {
   subscribeToSpecimens,
   saveSpecimenToCloud,
@@ -341,8 +341,22 @@ function sanitizeSpecimens(list: SpecimenRecord[]): SpecimenRecord[] {
         }
       }
 
+      let finalHero = item.heroImage;
+      if (item.scientificName === 'Bothriechis lateralis') {
+        if (!finalHero || finalHero.includes('isthmohyla') || finalHero.includes('ophiscr.com')) {
+          finalHero = '/uploads/bothriechis_lateralis.jpg';
+        }
+      } else if (item.scientificName?.includes('Cerrophid')) {
+        if (!finalHero || finalHero.includes('isthmohyla') || finalHero.includes('gstatic')) {
+          finalHero = '/uploads/cerrophidium_sasai.jpg';
+        }
+      } else if (item.taxonGroup !== 'Amphibia' && finalHero && finalHero.includes('isthmohyla')) {
+        finalHero = getTaxonFallbackImage(item.taxonGroup, item.scientificName);
+      }
+
       return {
         ...item,
+        heroImage: finalHero,
         taxonomy: cleanTaxonomy,
         bioacoustics: cleanBio,
         sightings: realSightings,

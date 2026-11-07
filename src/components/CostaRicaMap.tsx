@@ -327,7 +327,7 @@ export const CostaRicaMap: React.FC<CostaRicaMapProps> = ({
       popupContent.className = 'p-1 font-sans text-sm min-w-[210px]';
       popupContent.innerHTML = `
         <div class="relative w-full h-24 rounded-lg overflow-hidden mb-2 bg-[#002217]">
-          <img src="${specimen.heroImage || '/isthmohyla_nacientes.jpg'}" onerror="this.src='/isthmohyla_nacientes.jpg'" class="w-full h-full object-cover" alt="${specimen.scientificName}"/>
+          <img src="${specimen.heroImage || (specimen.taxonGroup === 'Amphibia' ? '/isthmohyla_nacientes.jpg' : '/uploads/bothriechis_lateralis.jpg')}" referrerpolicy="no-referrer" onerror="this.src='/uploads/bothriechis_lateralis.jpg'" class="w-full h-full object-cover" alt="${specimen.scientificName}"/>
           <span class="absolute top-1 left-1 bg-white/90 text-[#002217] text-[10px] font-mono px-1.5 py-0.5 rounded font-bold">
             ${specimen.catalogNumber}
           </span>

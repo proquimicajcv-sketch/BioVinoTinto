@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { SpecimenRecord } from '../types/specimen';
 import { ThemeSwitcher } from './ThemeSwitcher';
-import { handleImageOfflineFallback } from '../utils/offlineImageCache';
+import { handleImageOfflineFallback, getTaxonFallbackImage } from '../utils/offlineImageCache';
 
 interface SpecimenCatalogViewProps {
   specimens: SpecimenRecord[];
@@ -341,10 +341,14 @@ export const SpecimenCatalogView: React.FC<SpecimenCatalogViewProps> = ({
                 {/* Card Photo Header */}
                 <div className="relative w-full h-44 bg-[#0f382a] overflow-hidden">
                   <img
-                    src={specimen.heroImage || '/isthmohyla_nacientes.jpg'}
+                    src={specimen.heroImage || getTaxonFallbackImage(specimen.taxonGroup, specimen.scientificName)}
                     alt={specimen.scientificName}
+                    referrerPolicy="no-referrer"
                     onError={(e) => {
-                      handleImageOfflineFallback(e.currentTarget as HTMLImageElement, '/isthmohyla_nacientes.jpg');
+                      handleImageOfflineFallback(
+                        e.currentTarget as HTMLImageElement,
+                        getTaxonFallbackImage(specimen.taxonGroup, specimen.scientificName)
+                      );
                     }}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
