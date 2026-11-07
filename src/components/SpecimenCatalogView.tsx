@@ -338,17 +338,17 @@ export const SpecimenCatalogView: React.FC<SpecimenCatalogViewProps> = ({
                 onClick={() => onSelectSpecimen(specimen)}
                 className="bg-white rounded-2xl border border-[#c1c8c3]/70 overflow-hidden shadow-sm hover:shadow-md hover:border-[#006c49]/50 transition-all cursor-pointer flex flex-col group"
               >
-                {/* Card Photo Header - Imagen completa sin recortar */}
-                <div className="relative w-full h-48 bg-[#041c14] overflow-hidden flex items-center justify-center">
-                  {/* Fondo ambiental sutil desenfocado para llenar el marco con la misma paleta */}
+                {/* Card Photo Header - Imagen completa sin recortes ni tapar texto */}
+                <div className="relative w-full h-52 bg-[#02150e] overflow-hidden flex items-center justify-center">
+                  {/* Fondo ambiental sutil desenfocado */}
                   <img
                     src={specimen.heroImage || getTaxonFallbackImage(specimen.taxonGroup, specimen.scientificName)}
                     alt=""
                     aria-hidden="true"
                     referrerPolicy="no-referrer"
-                    className="absolute inset-0 w-full h-full object-cover blur-md opacity-35 scale-110 pointer-events-none select-none"
+                    className="absolute inset-0 w-full h-full object-cover blur-md opacity-30 scale-110 pointer-events-none select-none"
                   />
-                  {/* Fotografía principal completa (organismo 100% visible sin cortes) */}
+                  {/* Fotografía del espécimen completa */}
                   <img
                     src={specimen.heroImage || getTaxonFallbackImage(specimen.taxonGroup, specimen.scientificName)}
                     alt={specimen.scientificName}
@@ -359,54 +359,53 @@ export const SpecimenCatalogView: React.FC<SpecimenCatalogViewProps> = ({
                         getTaxonFallbackImage(specimen.taxonGroup, specimen.scientificName)
                       );
                     }}
-                    className="relative z-10 max-w-full max-h-full object-contain p-1.5 group-hover:scale-105 transition-transform duration-300 drop-shadow-md select-none"
+                    className="relative z-10 max-w-full max-h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300 drop-shadow-md select-none"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent pointer-events-none z-10" />
 
-                  {/* Catalog Pill */}
-                  <span className="absolute top-2.5 left-2.5 bg-white/95 backdrop-blur-md text-[#002217] font-mono text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                  {/* Catalog Pill en esquina superior izquierda */}
+                  <span className="absolute top-2.5 left-2.5 z-20 bg-black/65 backdrop-blur-md text-white font-mono text-[10px] font-bold px-2 py-0.5 rounded-md shadow-sm border border-white/20">
                     {specimen.catalogNumber}
                   </span>
 
-                  {/* Group & Sightings badges */}
-                  <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
+                  {/* Group & Sightings badges en esquina superior derecha */}
+                  <div className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1.5">
                     {sightingsCount > 0 ? (
                       <span className="bg-[#0284c7] text-white font-mono text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm flex items-center gap-0.5">
                         <span className="material-symbols-outlined text-[12px]">visibility</span>
-                        <span>{sightingsCount} {sightingsCount === 1 ? 'avist.' : 'avist.'}</span>
+                        <span>{sightingsCount} avist.</span>
                       </span>
                     ) : (
-                      <span className="bg-black/40 backdrop-blur-xs text-[#a5d0bc] font-mono text-[10px] px-2 py-0.5 rounded-full shadow-sm flex items-center gap-0.5">
+                      <span className="bg-black/60 backdrop-blur-md text-[#a5d0bc] font-mono text-[10px] px-2 py-0.5 rounded-full shadow-sm flex items-center gap-0.5 border border-white/10">
                         <span className="material-symbols-outlined text-[12px]">visibility</span>
                         <span>0 avist.</span>
                       </span>
                     )}
-                    <span className="bg-[#002217]/90 text-[#6cf8bb] font-mono text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                    <span className="bg-[#002217]/90 text-[#6cf8bb] font-mono text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm border border-[#6cf8bb]/30">
                       {specimen.taxonGroup}
                     </span>
                   </div>
-
-                  {/* Bottom Image Caption */}
-                  <div className="absolute bottom-2 left-2.5 right-2.5">
-                    <h3 className="text-white font-bold text-sm italic truncate">
-                      {specimen.scientificName}
-                    </h3>
-                    <p className="text-[#e1e3dd] text-xs truncate">
-                      {specimen.commonName}
-                    </p>
-                  </div>
                 </div>
 
-                {/* Card Details */}
-                <div className="p-3 flex flex-col justify-between flex-1 gap-2.5 text-xs text-[#414844]">
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1 text-[11px] text-[#717974] truncate">
-                      <span className="material-symbols-outlined text-[14px] text-[#006c49]">place</span>
+                {/* Card Details & Names (Fuera de la foto: 100% visible, nítido y legible) */}
+                <div className="p-3.5 flex flex-col justify-between flex-1 gap-2.5 text-xs text-[#414844]">
+                  {/* Nombre Científico y Nombre Común */}
+                  <div className="border-b border-[#e7e9e3] pb-2">
+                    <h3 className="text-[#002217] font-bold text-[15px] italic leading-snug group-hover:text-[#006c49] transition-colors">
+                      {specimen.scientificName}
+                    </h3>
+                    <p className="text-[#414844] text-[12px] font-medium leading-snug mt-0.5 line-clamp-1">
+                      {specimen.commonName || 'Sin nombre común registrado'}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center gap-1.5 text-[11px] text-[#55605a]">
+                      <span className="material-symbols-outlined text-[15px] text-[#006c49] shrink-0">place</span>
                       <span className="truncate">{specimen.georeference.locality}</span>
                     </div>
 
-                    <div className="flex items-center gap-1 text-[11px] text-[#717974] truncate">
-                      <span className="material-symbols-outlined text-[14px] text-[#16a34a]">landscape</span>
+                    <div className="flex items-center gap-1.5 text-[11px] text-[#55605a]">
+                      <span className="material-symbols-outlined text-[15px] text-[#16a34a] shrink-0">landscape</span>
                       <span className="truncate">{specimen.georeference.lifeZone || 'Zona de Vida Holdridge'}</span>
                     </div>
                   </div>
