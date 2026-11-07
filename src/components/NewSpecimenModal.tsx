@@ -437,35 +437,65 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
 
 
 
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+
+  const handleUploadCustomPhotoFromFile = async (file: File) => {
+    if (!file) return;
+    setIsUploadingPhoto(true);
+    try {
+      const cleanPrefix = (newPhotoLabel.trim() || 'galeria').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const permanentUrl = await saveImageOfflineAndServer(file, cleanPrefix);
+      const newEntry: PhotoRecord = {
+        id: `photo-${Date.now()}`,
+        url: permanentUrl,
+        label: newPhotoLabel.trim() || file.name.replace(/\.[^/.]+$/, '') || 'Vista adicional',
+        description: newPhotoDesc.trim() || 'Fotografía de campo capturada/subida desde el dispositivo.',
+      };
+      setAdditionalPhotosList((prev) => [...prev, newEntry]);
+      setNewPhotoUrl('');
+      setNewPhotoLabel('');
+      setNewPhotoDesc('');
+    } catch (err: any) {
+      alert('Error al subir la fotografía: ' + (err?.message || err));
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
+
   const handleAddCustomPhoto = async () => {
     if (!newPhotoUrl.trim()) return;
-    let finalPhotoUrl = newPhotoUrl.trim();
-    if (finalPhotoUrl.startsWith('http://') || finalPhotoUrl.startsWith('https://')) {
-      try {
-        const resp = await fetch('/api/cache-remote-image', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            url: finalPhotoUrl,
-            prefix: (newPhotoLabel || 'foto').replace(/\s+/g, '_'),
-          }),
-        });
-        const data = await resp.json();
-        if (data.success && data.localUrl) {
-          finalPhotoUrl = data.localUrl;
-        }
-      } catch {}
+    setIsUploadingPhoto(true);
+    try {
+      let finalPhotoUrl = newPhotoUrl.trim();
+      if (finalPhotoUrl.startsWith('http://') || finalPhotoUrl.startsWith('https://')) {
+        try {
+          const resp = await fetch('/api/cache-remote-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              url: finalPhotoUrl,
+              prefix: (newPhotoLabel || 'foto').replace(/\s+/g, '_'),
+            }),
+          });
+          const data = await resp.json();
+          if (data.success && data.localUrl) {
+            finalPhotoUrl = data.localUrl;
+          }
+        } catch {}
+      }
+      const newEntry: PhotoRecord = {
+        id: `photo-${Date.now()}`,
+        url: finalPhotoUrl,
+        label: newPhotoLabel.trim() || 'Vista adicional',
+        description: newPhotoDesc.trim() || 'Fotografía de campo agregada por URL.',
+      };
+      setAdditionalPhotosList((prev) => [...prev, newEntry]);
+      setNewPhotoUrl('');
+      setNewPhotoLabel('');
+      setNewPhotoDesc('');
+    } finally {
+      setIsUploadingPhoto(false);
     }
-    const newEntry: PhotoRecord = {
-      id: `photo-${Date.now()}`,
-      url: finalPhotoUrl,
-      label: newPhotoLabel.trim() || 'Vista adicional',
-      description: newPhotoDesc.trim() || 'Fotografía de campo agregada por URL.',
-    };
-    setAdditionalPhotosList([...additionalPhotosList, newEntry]);
-    setNewPhotoUrl('');
-    setNewPhotoLabel('');
-    setNewPhotoDesc('');
   };
 
   const handleRemoveCustomPhoto = (id: string) => {
@@ -1459,73 +1489,125 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
             </div>
           </div>
 
-          {/* GALERÍA DE FOTOS ADICIONALES POR URL */}
-          <div className="p-3.5 rounded-xl bg-white border border-[#c1c8c3] flex flex-col gap-3">
+          {/* GALERÍA DE VISTAS Y FOTOGRAFÍAS */}
+          <div className="p-4 rounded-2xl bg-white border border-[#c1c8c3] flex flex-col gap-3 shadow-xs">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-[#002217] flex items-center gap-1.5 uppercase">
-                <span className="material-symbols-outlined text-[#006c49] text-[18px]">photo_library</span>
-                Galería de Vistas &amp; Fotos por URL ({additionalPhotosList.length})
+                <span className="material-symbols-outlined text-[#006c49] text-[20px]">photo_library</span>
+                Galería de Vistas y Fotografías ({additionalPhotosList.length})
               </label>
-              <span className="text-[11px] text-[#717974] font-mono">Persistencia en cualquier equipo</span>
+              <span className="text-[11px] text-[#006c49] font-mono font-bold bg-[#6cf8bb]/15 px-2 py-0.5 rounded-full border border-[#006c49]/20">
+                Sincronización en vivo entre dispositivos
+              </span>
             </div>
 
             {/* List of current additional photos */}
             {additionalPhotosList.length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                 {additionalPhotosList.map((photo) => (
-                  <div key={photo.id} className="relative rounded-lg overflow-hidden border border-[#c1c8c3] bg-[#f8faf4] p-1.5 flex flex-col gap-1">
-                    <img src={photo.url} alt={photo.label} className="w-full h-16 object-cover rounded" />
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="font-bold text-[#002217] truncate">{photo.label}</span>
+                  <div key={photo.id} className="relative rounded-xl overflow-hidden border border-[#c1c8c3] bg-[#00170f] flex flex-col group shadow-2xs">
+                    <div className="relative w-full h-24 flex items-center justify-center overflow-hidden">
+                      <img src={photo.url} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover blur-sm opacity-30" />
+                      <img src={photo.url} alt={photo.label} className="relative z-10 max-w-full max-h-full object-contain p-1" />
                       <button
                         type="button"
                         onClick={() => handleRemoveCustomPhoto(photo.id)}
-                        className="text-red-500 hover:text-red-700 cursor-pointer"
+                        className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/70 hover:bg-red-600 text-white flex items-center justify-center transition-colors cursor-pointer z-20"
                         title="Eliminar foto"
                       >
-                        <span className="material-symbols-outlined text-[15px]">delete</span>
+                        <span className="material-symbols-outlined text-[14px]">delete</span>
                       </button>
+                    </div>
+                    <div className="p-1.5 bg-[#002217] text-white flex flex-col">
+                      <span className="font-bold text-[11px] truncate">{photo.label}</span>
+                      {photo.description && (
+                        <span className="text-[10px] text-[#a5d0bc] truncate">{photo.description}</span>
+                      )}
                     </div>
                   </div>
                 ))}
               </div>
             )}
 
-            {/* Add new photo by URL */}
-            <div className="p-2.5 rounded-lg bg-[#f8faf4] border border-[#c1c8c3]/60 flex flex-col gap-2">
-              <span className="text-[11px] font-bold text-[#002217]">Agregar Nueva Fotografía o Vista:</span>
+            {/* Formulario para agregar fotografía: Del Equipo (dispositivo) o por URL */}
+            <div className="p-3.5 rounded-xl bg-[#f4f7f2] border border-[#c1c8c3]/80 flex flex-col gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#e1e3dd] pb-2">
+                <span className="text-xs font-bold text-[#002217] flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[#006c49] text-[18px]">add_photo_alternate</span>
+                  Agregar Nueva Fotografía o Vista de Campo:
+                </span>
+                {isUploadingPhoto && (
+                  <span className="text-xs font-bold text-[#006c49] flex items-center gap-1 animate-pulse">
+                    <span className="material-symbols-outlined text-[16px]">sync</span>
+                    Subiendo y sincronizando foto...
+                  </span>
+                )}
+              </div>
+
+              {/* Botón directo para subir desde equipo / cámara */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <input
+                  type="file"
+                  id="modal-add-gallery-file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      handleUploadCustomPhotoFromFile(file);
+                    }
+                  }}
+                />
+                <label
+                  htmlFor="modal-add-gallery-file"
+                  className="px-4 py-2 rounded-xl bg-[#006c49] hover:bg-[#00875a] text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-sm transition-all active:scale-95"
+                >
+                  <span className="material-symbols-outlined text-[18px]">upload_file</span>
+                  <span>📁 Subir Fotografía desde mi Equipo</span>
+                </label>
+
+                <span className="text-[11px] text-[#717974] font-medium text-center sm:text-left">
+                  o pega un enlace público de internet abajo:
+                </span>
+              </div>
+
+              {/* Campos opcionales de URL, Etiqueta y Descripción */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <input
                   type="url"
                   value={newPhotoUrl}
                   onChange={(e) => setNewPhotoUrl(e.target.value)}
-                  placeholder="https://... URL pública de la imagen"
-                  className="px-2.5 py-1.5 rounded bg-white border border-[#c1c8c3] text-xs text-[#191c19]"
+                  placeholder="https://... URL pública de la imagen (opcional)"
+                  className="px-3 py-2 rounded-lg bg-white border border-[#c1c8c3] text-xs text-[#191c19] focus:ring-2 focus:ring-[#006c49]"
                 />
                 <input
                   type="text"
                   value={newPhotoLabel}
                   onChange={(e) => setNewPhotoLabel(e.target.value)}
-                  placeholder="Etiqueta (ej. Ojo, Flanco, Puesta)"
-                  className="px-2.5 py-1.5 rounded bg-white border border-[#c1c8c3] text-xs text-[#191c19]"
+                  placeholder="Etiqueta / Nombre (ej. Ojo, Flanco, Puesta, Hembra)"
+                  className="px-3 py-2 rounded-lg bg-white border border-[#c1c8c3] text-xs text-[#191c19] focus:ring-2 focus:ring-[#006c49]"
                 />
               </div>
-              <div className="flex items-center justify-between gap-2">
+
+              <div className="flex flex-col sm:flex-row items-center gap-2">
                 <input
                   type="text"
                   value={newPhotoDesc}
                   onChange={(e) => setNewPhotoDesc(e.target.value)}
-                  placeholder="Descripción científica de la toma..."
-                  className="flex-1 px-2.5 py-1.5 rounded bg-white border border-[#c1c8c3] text-xs text-[#191c19]"
+                  placeholder="Descripción científica o notas de la fotografía..."
+                  className="flex-1 w-full px-3 py-2 rounded-lg bg-white border border-[#c1c8c3] text-xs text-[#191c19] focus:ring-2 focus:ring-[#006c49]"
                 />
-                <button
-                  type="button"
-                  onClick={handleAddCustomPhoto}
-                  className="px-3 py-1.5 rounded bg-[#002217] hover:bg-[#0f382a] text-[#6cf8bb] font-bold text-xs flex items-center gap-1 cursor-pointer whitespace-nowrap"
-                >
-                  <span className="material-symbols-outlined text-[15px]">add</span>
-                  <span>Agregar Foto</span>
-                </button>
+                {newPhotoUrl.trim() && (
+                  <button
+                    type="button"
+                    onClick={handleAddCustomPhoto}
+                    disabled={isUploadingPhoto}
+                    className="w-full sm:w-auto px-4 py-2 rounded-lg bg-[#002217] hover:bg-[#0f382a] text-[#6cf8bb] font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap shadow-xs"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">add_link</span>
+                    <span>Guardar Foto por URL</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>
