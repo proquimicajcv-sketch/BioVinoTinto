@@ -238,6 +238,14 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
   const [sightingGpsError, setSightingGpsError] = useState<string | null>(null);
   const [sightingGpsSource, setSightingGpsSource] = useState<'DEVICE_GPS' | 'MAP_SELECTION' | 'MANUAL_COORDS'>('MAP_SELECTION');
 
+  // Control de seguridad por clave para eliminación y edición de avistamientos
+  const [pinPromptAction, setPinPromptAction] = useState<{
+    action: 'delete' | 'edit';
+    sighting: SightingEntry;
+  } | null>(null);
+  const [enteredPin, setEnteredPin] = useState('');
+  const [pinErrorMsg, setPinErrorMsg] = useState<string | null>(null);
+
   const handleCaptureSightingDeviceLocation = async () => {
     setIsCapturingSightingGps(true);
     setSightingGpsError(null);
@@ -507,9 +515,49 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
     setTimeout(() => setSaveSuccessMsg(null), 4000);
   };
 
-  const handleDeleteSighting = (sightingId: string) => {
-    if (window.confirm('¿Seguro que deseas eliminar este avistamiento?')) {
-      const updatedSightings = (specimen.sightings || []).filter((s) => s.id !== sightingId);
+  // Verificación de autoría o clave de seguridad (5531)
+  const isOriginalAuthor = (sight: SightingEntry): boolean => {
+    const activeObserver = (currentObserverName || '').trim().toLowerCase();
+    const sightingAuthor = (sight.observer || '').trim().toLowerCase();
+    if (!activeObserver || !sightingAuthor) return false;
+    return activeObserver === sightingAuthor;
+  };
+
+  const handleRequestEditSighting = (sight: SightingEntry) => {
+    // Si la persona actual es quien lo realizó, puede editarlo directamente
+    if (isOriginalAuthor(sight)) {
+      handleOpenEditSighting(sight);
+      return;
+    }
+    // Si no es el autor original, se exige la clave de seguridad
+    setPinPromptAction({ action: 'edit', sighting: sight });
+    setEnteredPin('');
+    setPinErrorMsg(null);
+  };
+
+  const handleRequestDeleteSighting = (sight: SightingEntry) => {
+    // Para borrar avistamientos se requiere la clave de seguridad según la directriz
+    setPinPromptAction({ action: 'delete', sighting: sight });
+    setEnteredPin('');
+    setPinErrorMsg(null);
+  };
+
+  const handleConfirmPinAction = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!pinPromptAction) return;
+
+    if (enteredPin !== '5531') {
+      setPinErrorMsg('Clave incorrecta. Acceso restringido.');
+      return;
+    }
+
+    const { action, sighting } = pinPromptAction;
+    setPinPromptAction(null);
+    setEnteredPin('');
+    setPinErrorMsg(null);
+
+    if (action === 'delete') {
+      const updatedSightings = (specimen.sightings || []).filter((s) => s.id !== sighting.id);
       const updatedSpecimen: SpecimenRecord = {
         ...specimen,
         sightings: updatedSightings,
@@ -517,8 +565,17 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
       if (onSaveSpecimen) {
         onSaveSpecimen(updatedSpecimen);
       }
-      setSaveSuccessMsg('Avistamiento eliminado y cambios guardados.');
+      setSaveSuccessMsg('Avistamiento eliminado exitosamente.');
       setTimeout(() => setSaveSuccessMsg(null), 3000);
+    } else if (action === 'edit') {
+      handleOpenEditSighting(sighting);
+    }
+  };
+
+  const handleDeleteSighting = (sightingId: string) => {
+    const sight = (specimen.sightings || []).find((s) => s.id === sightingId);
+    if (sight) {
+      handleRequestDeleteSighting(sight);
     }
   };
 
@@ -1571,17 +1628,17 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                         </span>
                         <button
                           type="button"
-                          onClick={() => handleOpenEditSighting(sight)}
+                          onClick={() => handleRequestEditSighting(sight)}
                           className="w-7 h-7 rounded-lg bg-white border border-[#c1c8c3] text-[#006c49] hover:bg-[#006c49] hover:text-white flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
-                          title="Editar día, hora y datos de este avistamiento"
+                          title={isOriginalAuthor(sight) ? "Editar este avistamiento (autor)" : "Editar avistamiento (requiere autorización o clave)"}
                         >
                           <span className="material-symbols-outlined text-[15px]">edit</span>
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleDeleteSighting(sight.id)}
+                          onClick={() => handleRequestDeleteSighting(sight)}
                           className="w-7 h-7 rounded-lg bg-white border border-[#c1c8c3] text-[#717974] hover:bg-red-600 hover:text-white flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
-                          title="Eliminar este avistamiento"
+                          title="Eliminar este avistamiento (requiere clave de seguridad)"
                         >
                           <span className="material-symbols-outlined text-[15px]">delete</span>
                         </button>
@@ -2912,6 +2969,101 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
               </div>
               <p className="text-sm text-[#191c19] leading-relaxed">{activePhotoModal.desc}</p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE SEGURIDAD POR CLAVE (PIN) */}
+      {pinPromptAction && (
+        <div
+          className="fixed inset-0 z-[120] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in"
+          onClick={() => {
+            setPinPromptAction(null);
+            setEnteredPin('');
+            setPinErrorMsg(null);
+          }}
+        >
+          <div
+            className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl border border-[#c1c8c3] flex flex-col gap-4 text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-14 h-14 rounded-2xl bg-[#002217] text-[#6cf8bb] flex items-center justify-center mx-auto shadow-md">
+              <span className="material-symbols-outlined text-[32px]">
+                {pinPromptAction.action === 'delete' ? 'lock_person' : 'security'}
+              </span>
+            </div>
+
+            <div>
+              <h3 className="text-base font-bold text-[#002217]">
+                {pinPromptAction.action === 'delete'
+                  ? 'Autorización para Eliminar Avistamiento'
+                  : 'Autorización para Editar Avistamiento'}
+              </h3>
+              <p className="text-xs text-[#55605a] mt-1.5 leading-relaxed">
+                {pinPromptAction.action === 'delete'
+                  ? 'Para eliminar registros de campo se requiere introducir la clave de seguridad autorizada.'
+                  : `Este avistamiento fue registrado por "${pinPromptAction.sighting.observer || 'otro observador'}". Para editarlo, introduce la clave autorizada.`}
+              </p>
+            </div>
+
+            <form onSubmit={handleConfirmPinAction} className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1 text-left">
+                <label className="text-[11px] font-bold text-[#002217] uppercase tracking-wider">
+                  Clave de Seguridad
+                </label>
+                <div className="relative">
+                  <input
+                    type="password"
+                    autoFocus
+                    maxLength={10}
+                    value={enteredPin}
+                    onChange={(e) => {
+                      setEnteredPin(e.target.value);
+                      if (pinErrorMsg) setPinErrorMsg(null);
+                    }}
+                    placeholder="••••"
+                    className="w-full px-4 py-3 text-center text-xl tracking-[0.3em] font-mono font-bold bg-[#f8faf4] border-2 border-[#c1c8c3] rounded-xl text-[#002217] focus:outline-none focus:border-[#006c49] focus:bg-white transition-all"
+                  />
+                  <span className="absolute right-3 top-3.5 text-[#717974] material-symbols-outlined text-[20px] pointer-events-none">
+                    password
+                  </span>
+                </div>
+                {pinErrorMsg && (
+                  <p className="text-xs text-red-600 font-bold flex items-center gap-1 mt-1">
+                    <span className="material-symbols-outlined text-[15px]">error</span>
+                    <span>{pinErrorMsg}</span>
+                  </p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPinPromptAction(null);
+                    setEnteredPin('');
+                    setPinErrorMsg(null);
+                  }}
+                  className="py-2.5 px-4 rounded-xl border border-[#c1c8c3] text-xs font-bold text-[#414844] hover:bg-[#f0f2ec] cursor-pointer transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={!enteredPin.trim()}
+                  className={`py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-1 transition-all shadow-sm cursor-pointer ${
+                    pinPromptAction.action === 'delete'
+                      ? 'bg-red-600 hover:bg-red-700 text-white disabled:opacity-50'
+                      : 'bg-[#002217] hover:bg-[#003d2b] text-[#6cf8bb] disabled:opacity-50'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[16px]">
+                    {pinPromptAction.action === 'delete' ? 'delete_forever' : 'check_circle'}
+                  </span>
+                  <span>{pinPromptAction.action === 'delete' ? 'Confirmar y Borrar' : 'Autorizar Edición'}</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

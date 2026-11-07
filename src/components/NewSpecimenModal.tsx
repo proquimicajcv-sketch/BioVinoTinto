@@ -237,6 +237,14 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
   // Delete confirmation modal state
   const [showDeletePrompt, setShowDeletePrompt] = useState(false);
 
+  // Control de seguridad por clave para editar/eliminar avistamientos existentes
+  const [sightingPinPrompt, setSightingPinPrompt] = useState<{
+    action: 'delete' | 'edit';
+    sighting: SightingEntry;
+  } | null>(null);
+  const [sightingEnteredPin, setSightingEnteredPin] = useState('');
+  const [sightingPinError, setSightingPinError] = useState<string | null>(null);
+
   // Synchronize modal state whenever opened with an existing specimen or new coords
   useEffect(() => {
     if (isOpen) {
@@ -1646,27 +1654,42 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
                         <button
                           type="button"
                           onClick={() => {
-                            setEditingSightingId(sight.id);
-                            setNewSightingLocality(sight.locality);
-                            setNewSightingCount(sight.count || 1);
-                            setNewSightingDate(sight.date || new Date().toISOString().slice(0, 10));
-                            setNewSightingTime(
-                              sight.timestamp?.match(/\b([0-9]{1,2}:[0-9]{2})\b/)?.[1] || '20:00'
-                            );
-                            setNewSightingBehavior(sight.behaviorObserved || '');
-                            setNewSightingNotes(sight.notes || '');
-                            setShowAddSighting(true);
+                            const isAuthor =
+                              collector &&
+                              sight.observer &&
+                              collector.trim().toLowerCase() === sight.observer.trim().toLowerCase();
+
+                            if (isAuthor) {
+                              setEditingSightingId(sight.id);
+                              setNewSightingLocality(sight.locality);
+                              setNewSightingCount(sight.count || 1);
+                              setNewSightingDate(sight.date || new Date().toISOString().slice(0, 10));
+                              setNewSightingTime(
+                                sight.timestamp?.match(/\b([0-9]{1,2}:[0-9]{2})\b/)?.[1] || '20:00'
+                              );
+                              setNewSightingBehavior(sight.behaviorObserved || '');
+                              setNewSightingNotes(sight.notes || '');
+                              setShowAddSighting(true);
+                            } else {
+                              setSightingPinPrompt({ action: 'edit', sighting: sight });
+                              setSightingEnteredPin('');
+                              setSightingPinError(null);
+                            }
                           }}
                           className="w-6 h-6 rounded bg-white border border-[#c1c8c3] text-[#006c49] hover:bg-[#006c49] hover:text-white flex items-center justify-center transition-colors cursor-pointer"
-                          title="Editar día, hora y datos de este avistamiento"
+                          title="Editar este avistamiento"
                         >
                           <span className="material-symbols-outlined text-[14px]">edit</span>
                         </button>
                         <button
                           type="button"
-                          onClick={() => setSightingsList(sightingsList.filter((s) => s.id !== sight.id))}
+                          onClick={() => {
+                            setSightingPinPrompt({ action: 'delete', sighting: sight });
+                            setSightingEnteredPin('');
+                            setSightingPinError(null);
+                          }}
                           className="w-6 h-6 rounded bg-white border border-[#c1c8c3] text-[#717974] hover:bg-red-600 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
-                          title="Eliminar este avistamiento"
+                          title="Eliminar este avistamiento (requiere clave de seguridad)"
                         >
                           <span className="material-symbols-outlined text-[14px]">delete</span>
                         </button>
@@ -1868,6 +1891,130 @@ export const NewSpecimenModal: React.FC<NewSpecimenModalProps> = ({
                 Sí, Eliminar
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Seguridad por Clave para Avistamientos */}
+      {sightingPinPrompt && (
+        <div
+          className="fixed inset-0 z-[130] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in"
+          onClick={() => {
+            setSightingPinPrompt(null);
+            setSightingEnteredPin('');
+            setSightingPinError(null);
+          }}
+        >
+          <div
+            className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl border border-[#c1c8c3] flex flex-col gap-4 text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-14 h-14 rounded-2xl bg-[#002217] text-[#6cf8bb] flex items-center justify-center mx-auto shadow-md">
+              <span className="material-symbols-outlined text-[32px]">
+                {sightingPinPrompt.action === 'delete' ? 'lock_person' : 'security'}
+              </span>
+            </div>
+
+            <div>
+              <h3 className="text-base font-bold text-[#002217]">
+                {sightingPinPrompt.action === 'delete'
+                  ? 'Autorización para Eliminar Avistamiento'
+                  : 'Autorización para Editar Avistamiento'}
+              </h3>
+              <p className="text-xs text-[#55605a] mt-1.5 leading-relaxed">
+                {sightingPinPrompt.action === 'delete'
+                  ? 'Para eliminar registros de campo se requiere introducir la clave de seguridad autorizada.'
+                  : `Este avistamiento fue registrado por "${sightingPinPrompt.sighting.observer || 'otro observador'}". Para editarlo, introduce la clave autorizada.`}
+              </p>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (sightingEnteredPin !== '5531') {
+                  setSightingPinError('Clave incorrecta. Acceso restringido.');
+                  return;
+                }
+                const targetSight = sightingPinPrompt.sighting;
+                const isDel = sightingPinPrompt.action === 'delete';
+                setSightingPinPrompt(null);
+                setSightingEnteredPin('');
+                setSightingPinError(null);
+
+                if (isDel) {
+                  setSightingsList((prev) => prev.filter((s) => s.id !== targetSight.id));
+                } else {
+                  setEditingSightingId(targetSight.id);
+                  setNewSightingLocality(targetSight.locality);
+                  setNewSightingCount(targetSight.count || 1);
+                  setNewSightingDate(targetSight.date || new Date().toISOString().slice(0, 10));
+                  setNewSightingTime(
+                    targetSight.timestamp?.match(/\b([0-9]{1,2}:[0-9]{2})\b/)?.[1] || '20:00'
+                  );
+                  setNewSightingBehavior(targetSight.behaviorObserved || '');
+                  setNewSightingNotes(targetSight.notes || '');
+                  setShowAddSighting(true);
+                }
+              }}
+              className="flex flex-col gap-3"
+            >
+              <div className="flex flex-col gap-1 text-left">
+                <label className="text-[11px] font-bold text-[#002217] uppercase tracking-wider">
+                  Clave de Seguridad
+                </label>
+                <div className="relative">
+                  <input
+                    type="password"
+                    autoFocus
+                    maxLength={10}
+                    value={sightingEnteredPin}
+                    onChange={(e) => {
+                      setSightingEnteredPin(e.target.value);
+                      if (sightingPinError) setSightingPinError(null);
+                    }}
+                    placeholder="••••"
+                    className="w-full px-4 py-3 text-center text-xl tracking-[0.3em] font-mono font-bold bg-[#f8faf4] border-2 border-[#c1c8c3] rounded-xl text-[#002217] focus:outline-none focus:border-[#006c49] focus:bg-white transition-all"
+                  />
+                  <span className="absolute right-3 top-3.5 text-[#717974] material-symbols-outlined text-[20px] pointer-events-none">
+                    password
+                  </span>
+                </div>
+                {sightingPinError && (
+                  <p className="text-xs text-red-600 font-bold flex items-center gap-1 mt-1">
+                    <span className="material-symbols-outlined text-[15px]">error</span>
+                    <span>{sightingPinError}</span>
+                  </p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSightingPinPrompt(null);
+                    setSightingEnteredPin('');
+                    setSightingPinError(null);
+                  }}
+                  className="py-2.5 px-4 rounded-xl border border-[#c1c8c3] text-xs font-bold text-[#414844] hover:bg-[#f0f2ec] cursor-pointer transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={!sightingEnteredPin.trim()}
+                  className={`py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-1 transition-all shadow-sm cursor-pointer ${
+                    sightingPinPrompt.action === 'delete'
+                      ? 'bg-red-600 hover:bg-red-700 text-white disabled:opacity-50'
+                      : 'bg-[#002217] hover:bg-[#003d2b] text-[#6cf8bb] disabled:opacity-50'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[16px]">
+                    {sightingPinPrompt.action === 'delete' ? 'delete_forever' : 'check_circle'}
+                  </span>
+                  <span>{sightingPinPrompt.action === 'delete' ? 'Confirmar y Borrar' : 'Autorizar Edición'}</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
