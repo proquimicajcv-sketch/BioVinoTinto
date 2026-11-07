@@ -1216,12 +1216,13 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                   {specimen.additionalPhotos.length} Archivos
                 </span>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {specimen.additionalPhotos.map((photo) => (
                   <div
                     key={photo.id}
-                    className="relative rounded-lg overflow-hidden h-28 group bg-[#00170f] border border-[#c1c8c3]/40 hover:border-[#006c49] transition-all flex items-center justify-center"
+                    className="flex flex-col bg-[#011a11] rounded-xl overflow-hidden border border-[#c1c8c3]/40 hover:border-[#006c49] transition-all shadow-sm group"
                   >
+                    {/* Visualizador de la fotografía */}
                     <div
                       onClick={() =>
                         setActivePhotoModal({
@@ -1231,16 +1232,17 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                           desc: photo.description,
                         })
                       }
-                      className="w-full h-full cursor-pointer relative flex items-center justify-center overflow-hidden"
+                      className="relative w-full h-32 sm:h-36 cursor-pointer overflow-hidden flex items-center justify-center bg-[#00170f]"
                     >
-                      {/* Ambient blur backdrop */}
+                      {/* Fondo ambiental desenfocado */}
                       <img
                         src={photo.url}
                         alt=""
                         aria-hidden="true"
                         referrerPolicy="no-referrer"
-                        className="absolute inset-0 w-full h-full object-cover blur-sm opacity-35 scale-110 pointer-events-none"
+                        className="absolute inset-0 w-full h-full object-cover blur-sm opacity-30 scale-110 pointer-events-none"
                       />
+                      {/* Fotografía nítida completa */}
                       <img
                         src={photo.url}
                         alt={photo.label}
@@ -1251,12 +1253,21 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                           handleImageOfflineFallback(
                             e.currentTarget as HTMLImageElement,
                             isMacho
-                              ? '/hallazgo_macho_un_ojo.jpg'
+                              ? '/uploads/macho_tuerto_isthmohyla_propia.jpg'
                               : getTaxonFallbackImage(specimen.taxonGroup, specimen.scientificName)
                           );
                         }}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none z-10" />
+
+                      {/* Botón táctil para sustituir foto */}
+                      <label
+                        htmlFor={`file-input-${photo.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-black/75 hover:bg-[#006c49] text-[#6cf8bb] flex items-center justify-center transition-all shadow-md cursor-pointer z-20 border border-[#6cf8bb]/40 hover:scale-110"
+                        title="Subir o cambiar fotografía"
+                      >
+                        <span className="material-symbols-outlined text-[15px]">edit</span>
+                      </label>
                     </div>
 
                     {/* Input de archivo nativo directo */}
@@ -1273,19 +1284,20 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
                       }}
                     />
 
-                    {/* Botón táctil directo para sustituir foto */}
-                    <label
-                      htmlFor={`file-input-${photo.id}`}
-                      onClick={(e) => e.stopPropagation()}
-                      className="absolute top-1.5 right-1.5 w-8 h-8 rounded-full bg-[#002217] hover:bg-[#006c49] active:scale-90 text-[#6cf8bb] flex items-center justify-center transition-all shadow-md cursor-pointer z-20 border border-[#6cf8bb]/60 hover:border-white"
-                      title="Sustituir fotografía desde tu dispositivo"
-                    >
-                      <span className="material-symbols-outlined text-[17px]">edit</span>
-                    </label>
-
-                    <span className="absolute bottom-1.5 left-1.5 right-1.5 px-1.5 py-0.5 rounded bg-[#002217]/90 text-white font-mono text-[10px] truncate block pointer-events-none">
-                      {photo.label}
-                    </span>
+                    {/* Recuadro de rotulación claro y legible */}
+                    <div className="p-2 bg-[#002217] border-t border-white/10 flex items-center justify-between gap-1">
+                      <span className="font-mono text-[11px] font-bold text-[#e1e3dd] truncate tracking-wide" title={photo.label}>
+                        {photo.label}
+                      </span>
+                      <label
+                        htmlFor={`file-input-${photo.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-[#6cf8bb] hover:text-white text-[10px] font-bold flex items-center gap-0.5 cursor-pointer shrink-0"
+                        title="Cambiar fotografía"
+                      >
+                        <span className="material-symbols-outlined text-[13px]">upload</span>
+                      </label>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -2817,48 +2829,88 @@ export const SpecimenDetailView: React.FC<SpecimenDetailViewProps> = ({
               </button>
             </div>
             <div className="p-4 flex flex-col gap-2">
-              <div className="flex items-center justify-between gap-2">
-                <span className="font-mono text-xs font-bold text-[#006c49] uppercase">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <span className="font-mono text-xs font-bold text-[#006c49] uppercase tracking-wider">
                   {activePhotoModal.label}
                 </span>
-                <button
-                  onClick={() => {
-                    if (activePhotoModal.sightingId) {
-                      const sightingId = activePhotoModal.sightingId;
-                      setActivePhotoModal(null);
-                      setEditingPhoto({
-                        id: `sighting-curious-${sightingId}`,
-                        sightingId: sightingId,
-                        label: activePhotoModal.label,
-                        url: activePhotoModal.url,
-                        description: activePhotoModal.desc,
-                      });
-                      setEditPhotoUrl(activePhotoModal.url);
-                      setEditPhotoDesc(activePhotoModal.desc);
-                      return;
-                    }
 
-                    const target =
-                      (activePhotoModal.id ? specimen.additionalPhotos?.find((p) => p.id === activePhotoModal.id) : null) ||
-                      specimen.additionalPhotos?.find((p) => p.label === activePhotoModal.label) ||
-                      specimen.additionalPhotos?.find((p) => p.url === activePhotoModal.url) || {
-                        id: activePhotoModal.id || 'photo-1',
-                        label: activePhotoModal.label,
-                        url: activePhotoModal.url,
-                        description: activePhotoModal.desc,
-                      };
-                    setActivePhotoModal(null);
-                    setEditingPhoto(target);
-                    setEditPhotoUrl(target.url);
-                    setEditPhotoDesc(target.description);
-                  }}
-                  className="px-2.5 py-1 rounded-lg bg-[#002217] text-[#6cf8bb] text-xs font-bold hover:bg-[#003d2b] flex items-center gap-1 cursor-pointer transition-colors"
-                >
-                  <span className="material-symbols-outlined text-[14px]">edit</span>
-                  <span>Sustituir fotografía</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  {/* Input directo nativo para subir foto desde el modal */}
+                  <input
+                    type="file"
+                    id="lightbox-direct-file-input"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file && activePhotoModal) {
+                        try {
+                          const targetId = activePhotoModal.id || 'photo-4';
+                          const isMacho = targetId === 'photo-4' || activePhotoModal.label.toLowerCase().includes('macho tuerto');
+                          const permUrl = await saveImageOfflineAndServer(file, isMacho ? 'macho_tuerto' : 'gallery_edit');
+
+                          if (activePhotoModal.sightingId) {
+                            await handleSaveCuriousFindingPhoto(activePhotoModal.sightingId, permUrl, activePhotoModal.desc);
+                          } else {
+                            await handleDirectPhotoUpload(targetId, file);
+                          }
+                          setActivePhotoModal({
+                            ...activePhotoModal,
+                            url: permUrl,
+                          });
+                        } catch (err: any) {
+                          alert('Error al subir fotografía: ' + (err?.message || err));
+                        }
+                      }
+                    }}
+                  />
+                  <label
+                    htmlFor="lightbox-direct-file-input"
+                    className="px-3 py-1.5 rounded-lg bg-[#006c49] text-white text-xs font-bold hover:bg-[#00875a] flex items-center gap-1.5 cursor-pointer transition-colors shadow-sm"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">upload_file</span>
+                    <span>Subir desde Dispositivo</span>
+                  </label>
+
+                  <button
+                    onClick={() => {
+                      if (activePhotoModal.sightingId) {
+                        const sightingId = activePhotoModal.sightingId;
+                        setActivePhotoModal(null);
+                        setEditingPhoto({
+                          id: `sighting-curious-${sightingId}`,
+                          sightingId: sightingId,
+                          label: activePhotoModal.label,
+                          url: activePhotoModal.url,
+                          description: activePhotoModal.desc,
+                        });
+                        setEditPhotoUrl(activePhotoModal.url);
+                        setEditPhotoDesc(activePhotoModal.desc);
+                        return;
+                      }
+
+                      const target =
+                        (activePhotoModal.id ? specimen.additionalPhotos?.find((p) => p.id === activePhotoModal.id) : null) ||
+                        specimen.additionalPhotos?.find((p) => p.label === activePhotoModal.label) ||
+                        specimen.additionalPhotos?.find((p) => p.url === activePhotoModal.url) || {
+                          id: activePhotoModal.id || 'photo-1',
+                          label: activePhotoModal.label,
+                          url: activePhotoModal.url,
+                          description: activePhotoModal.desc,
+                        };
+                      setActivePhotoModal(null);
+                      setEditingPhoto(target);
+                      setEditPhotoUrl(target.url);
+                      setEditPhotoDesc(target.description);
+                    }}
+                    className="px-2.5 py-1.5 rounded-lg bg-[#002217] text-[#6cf8bb] text-xs font-bold hover:bg-[#003d2b] flex items-center gap-1 cursor-pointer transition-colors border border-[#6cf8bb]/30"
+                  >
+                    <span className="material-symbols-outlined text-[15px]">edit</span>
+                    <span>Editar detalles</span>
+                  </button>
+                </div>
               </div>
-              <p className="text-sm text-[#191c19]">{activePhotoModal.desc}</p>
+              <p className="text-sm text-[#191c19] leading-relaxed">{activePhotoModal.desc}</p>
             </div>
           </div>
         </div>

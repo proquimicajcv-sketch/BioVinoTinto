@@ -235,21 +235,20 @@ function sanitizeSpecimens(list: SpecimenRecord[]): SpecimenRecord[] {
         );
         const p4HasValidPhoto = existingP4?.url && !existingP4.url.includes('isthmohyla_nacientes') && !existingP4.url.includes('eye_zoom');
 
-        let activeMachoPhoto = '/hallazgo_macho_un_ojo.jpg';
+        // Prioridad de la fotografía auténtica del macho tuerto subida por el usuario
+        let activeMachoPhoto = '/uploads/macho_tuerto_isthmohyla_propia.jpg';
         const savedCustomMacho = typeof window !== 'undefined' ? localStorage.getItem('bio_macho_tuerto_custom_photo') : null;
 
-        if (p4HasValidPhoto && existingP4?.url) {
-          activeMachoPhoto = existingP4.url;
-        } else if (savedCustomMacho && !savedCustomMacho.includes('isthmohyla_nacientes') && !savedCustomMacho.includes('eye_zoom')) {
+        if (savedCustomMacho && !savedCustomMacho.includes('isthmohyla_nacientes.jpg') && !savedCustomMacho.includes('eye_zoom')) {
           activeMachoPhoto = savedCustomMacho;
+        } else if (p4HasValidPhoto && existingP4?.url && !existingP4.url.includes('isthmohyla_nacientes.jpg')) {
+          activeMachoPhoto = existingP4.url;
         }
 
-        // Ensure whatever custom photo is active is permanently saved locally and synchronized
-        if (activeMachoPhoto && activeMachoPhoto !== '/hallazgo_macho_un_ojo.jpg') {
-          try {
-            localStorage.setItem('bio_macho_tuerto_custom_photo', activeMachoPhoto);
-          } catch {}
-        }
+        // Asegurar que quede registrada permanentemente
+        try {
+          localStorage.setItem('bio_macho_tuerto_custom_photo', activeMachoPhoto);
+        } catch {}
 
         // 1. Ensure photo-3 (Detalle Ocular) ALWAYS keeps the eye zoom macro
         let cleanedPhotos = (rawPhotos || []).map((p) => {

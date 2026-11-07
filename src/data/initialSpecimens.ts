@@ -94,7 +94,7 @@ export const INITIAL_SPECIMENS: SpecimenRecord[] = [
       },
       {
         id: 'photo-4',
-        url: '/hallazgo_macho_un_ojo.jpg',
+        url: '/uploads/macho_tuerto_isthmohyla_propia.jpg',
         label: 'Hallazgo: Macho Tuerto',
         description: 'Hallazgo curioso en Santa María de Dota (Viernes 9): Macho adulto de Isthmohyla nacientes al que le falta un ojo (anoftalmia/cicatrización natural). Era el que cantaba con mayor potencia acústica a 45 cm del caudal.',
       },
